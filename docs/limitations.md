@@ -65,10 +65,16 @@ size is not settled.
 | Coding quality | 27 acceptance checks, ROCm | One run per condition; fixed order; harness policy confounds; ROCm only |
 | Coding agent | wall TPS, 12 configs | Wall TPS includes prefill/reasoning; one run per config; low pass rates |
 
-The speculative speedups differ by protocol: **1.28x** in the paired 3-round
-comparison, **1.65x** in the short-prompt Vulkan note, and **1.51x** in the
-coding-agent workload. These are different workloads, not three estimates of one
-number.
+The speculative speedups differ by protocol: **1.28x** for DFlash2 in the paired
+3-round comparison (95% CI 1.00–1.56, so marginal at n=9), **1.51x** for MTP in
+the same comparison (95% CI 1.37–1.63), **1.65x** in the short-prompt Vulkan
+note, and **1.51x** in the coding-agent workload. These are different workloads,
+not estimates of one number.
+
+The DFlash2 interval touching 1.00 is a limitation of the sample, not evidence
+that DFlash2 does nothing. The per-cell range is 0.94–1.69, which is consistent
+with a prompt-dependent effect. More prompts and more repetitions would narrow
+it; see `docs/related/speculative-decoding.md`.
 
 The coding-quality matrix explicitly says its 2048-token thinking comparison is
 confounded by test-freeze policy and tool-protocol overhead. It does not

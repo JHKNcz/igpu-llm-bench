@@ -26,6 +26,8 @@ two measured repetitions after warmup.
 Ratios: [`data/processed/llama-bench-ratios.csv`](data/processed/llama-bench-ratios.csv).
 Parsed rows: [`data/processed/llama-bench.csv`](data/processed/llama-bench.csv).
 
+![Decode throughput by backend and context depth](docs/figures/backend-depth.svg)
+
 **Caveat:** this is not a controlled A/B. The builds differ, the per-run VRAM
 carve-out is not consistently recorded, and ROCm’s own depth series is
 non-monotonic (10.89 at depth 0, 12.63 at 16K). A separate ROCm server baseline
@@ -85,17 +87,45 @@ Vulkan build `f872b5911 (11310)`, 32K context capacity, 256-token outputs,
 3 synthetic prompts, 3 rounds, greedy, thinking off, cache reuse disabled,
 9 measured requests per mode.
 
-| Mode | Median generation t/s | Speedup vs baseline | Speedup vs MTP-off | Samples | Source |
-|---|---:|---:|---:|---:|---|
-| Baseline | 23.78 | 1.00x | 0.93x | 9 | `data/processed/speculative-summary.json` |
-| DFlash2, 6 drafts | 31.02 | **1.28x** | 1.25x | 9 | same |
-| MTP-off | 25.90 | 1.07x | 1.00x | 9 | same |
-| MTP, 2 drafts | **36.27** | **1.51x** | **1.37x** | 9 | same |
+The speedup column is **paired**: the ratio is computed inside each
+(prompt, round) cell and then summarised across the 9 cells. Comparing two
+independent medians would ignore the pairing and overstate the uncertainty.
+Intervals are a 20,000-sample percentile bootstrap of the median ratio, seeded
+for reproducibility.
+
+| Mode | Median generation t/s | 95% CI of median | Paired speedup vs baseline | 95% CI of speedup | Source |
+|---|---:|---|---:|---|---|
+| Baseline | 23.78 | 22.29–25.66 | 1.00x | — | `data/processed/speculative-stats.json` |
+| DFlash2, 6 drafts | 31.02 | 23.98–37.74 | 1.28x | **1.00–1.56** | same |
+| MTP-off | 25.90 | 24.38–27.25 | 1.07x | 1.05–1.10 | same |
+| MTP, 2 drafts | **36.27** | 32.78–37.42 | **1.51x** | **1.37–1.63** | same |
+
+**Read the intervals, not just the point estimates.** With 9 paired cells:
+
+- **MTP is a clear win.** The 1.51x interval (1.37–1.63) excludes 1.00 by a
+  comfortable margin, and the per-cell range is 1.30–1.63.
+- **DFlash2 is marginal.** The 1.28x point estimate looks useful, but the
+  interval (1.00–1.56) touches 1.00 and the per-cell range runs from 0.94 to
+  1.69. On this sample, DFlash2 is not distinguishable from "no change" for
+  some prompts. The earlier claim of a solid 1.28x was too confident; the data
+  support "probably faster, possibly not."
+- **The MTP-off control is slightly faster than the baseline target** (1.07x,
+  interval 1.05–1.10). The two files are different GGUFs, so this is a
+  weight-file difference, not a decoding effect. It is why the MTP-on vs
+  MTP-off pair is the cleaner comparison: 1.37x (1.26–1.53).
+
+The statistics are reproducible:
+
+```bash
+python3 scripts/stats.py
+```
 
 Per-prompt medians are in
 [`docs/related/speculative-decoding.md`](docs/related/speculative-decoding.md).
 The 24 measured requests are in
 [`data/processed/speculative-measurements.csv`](data/processed/speculative-measurements.csv).
+
+![Speculative decoding medians with 95% confidence intervals](docs/figures/speculative.svg)
 
 ## 4. Long-context KV cache, 2026-10-18
 
@@ -183,6 +213,8 @@ recorded; 102.4 and 128 GB/s are the sensitivity bounds.
 Computed by [`scripts/roofline.py`](scripts/roofline.py); values in
 [`data/processed/roofline.csv`](data/processed/roofline.csv). The interpretation
 and hypotheses are in [`analysis/roofline.md`](analysis/roofline.md).
+
+![Effective bandwidth against the assumed 120 GB/s peak](docs/figures/roofline.svg)
 
 ## 7. What is not recorded
 

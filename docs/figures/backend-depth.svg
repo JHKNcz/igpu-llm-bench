@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="380" viewBox="0 0 760 380" role="img" aria-labelledby="title desc">
+<title id="title">Decode throughput by backend and context depth</title>
+<desc id="desc">Qwen3.6-35B-A3B IQ4_NL, tg128, ngl=999, flash attention on, 2 measured repetitions.</desc>
+<rect width="760" height="380" fill="#ffffff"/>
+<text x="64.0" y="26.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#1b1b1b" text-anchor="start" font-weight="600">Decode throughput by backend and context depth</text>
+<text x="64.0" y="44.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="start" font-weight="normal">Qwen3.6-35B-A3B IQ4_NL, tg128, ngl=999, flash attention on, 2 measured repetitions.</text>
+<line x1="64.0" y1="324.0" x2="736.0" y2="324.0" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="328.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">0 t/s</text>
+<line x1="64.0" y1="278.0" x2="736.0" y2="278.0" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="282.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">5 t/s</text>
+<line x1="64.0" y1="232.0" x2="736.0" y2="232.0" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="236.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">10 t/s</text>
+<line x1="64.0" y1="186.0" x2="736.0" y2="186.0" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="190.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">15 t/s</text>
+<line x1="64.0" y1="140.0" x2="736.0" y2="140.0" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="144.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">20 t/s</text>
+<line x1="64.0" y1="94.0" x2="736.0" y2="94.0" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="98.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">25 t/s</text>
+<line x1="64.0" y1="48.0" x2="736.0" y2="48.0" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="52.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">30 t/s</text>
+<rect x="122.4" y="91.1" width="48.9" height="232.9" fill="#2f6f8f"/>
+<text x="146.9" y="85.1" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1b1b1b" text-anchor="middle" font-weight="600">25.31</text>
+<rect x="180.7" y="223.8" width="48.9" height="100.2" fill="#b5732a"/>
+<text x="205.1" y="217.8" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1b1b1b" text-anchor="middle" font-weight="600">10.89</text>
+<text x="176.0" y="344.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#1b1b1b" text-anchor="middle" font-weight="normal">depth 0</text>
+<text x="176.0" y="360.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1f7a4d" text-anchor="middle" font-weight="600">2.32x</text>
+<rect x="346.4" y="140.4" width="48.9" height="183.6" fill="#2f6f8f"/>
+<text x="370.9" y="134.4" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1b1b1b" text-anchor="middle" font-weight="600">19.96</text>
+<rect x="404.7" y="207.8" width="48.9" height="116.2" fill="#b5732a"/>
+<text x="429.1" y="201.8" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1b1b1b" text-anchor="middle" font-weight="600">12.63</text>
+<text x="400.0" y="344.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#1b1b1b" text-anchor="middle" font-weight="normal">16K</text>
+<text x="400.0" y="360.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1f7a4d" text-anchor="middle" font-weight="600">1.58x</text>
+<rect x="570.4" y="195.5" width="48.9" height="128.5" fill="#2f6f8f"/>
+<text x="594.9" y="189.5" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1b1b1b" text-anchor="middle" font-weight="600">13.97</text>
+<rect x="628.7" y="251.9" width="48.9" height="72.1" fill="#b5732a"/>
+<text x="653.1" y="245.9" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1b1b1b" text-anchor="middle" font-weight="600">7.84</text>
+<text x="624.0" y="344.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#1b1b1b" text-anchor="middle" font-weight="normal">64K</text>
+<text x="624.0" y="360.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1f7a4d" text-anchor="middle" font-weight="600">1.78x</text>
+<line x1="64.0" y1="324.0" x2="736.0" y2="324.0" stroke="#1b1b1b" stroke-width="1.5"/>
+<rect x="64.0" y="357.0" width="10.0" height="10.0" fill="#2f6f8f"/>
+<text x="80.0" y="366.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#1b1b1b" text-anchor="start" font-weight="normal">Vulkan f872b5911 (11310)</text>
+<rect x="264.0" y="357.0" width="10.0" height="10.0" fill="#b5732a"/>
+<text x="280.0" y="366.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#1b1b1b" text-anchor="start" font-weight="normal">ROCm build unknown (0)</text>
+<text x="736.0" y="366.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">label under each group = Vulkan / ROCm ratio</text>
+</svg>

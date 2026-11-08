@@ -1,0 +1,142 @@
+{
+  "source": "data/processed/speculative-measurements.csv",
+  "bootstrap_iterations": 20000,
+  "seed": 20261018,
+  "method": "paired within (case, repeat); percentile bootstrap of the median",
+  "modes": {
+    "baseline": {
+      "samples": 9,
+      "median_generation_tps": 23.782,
+      "mad": 1.362,
+      "iqr": [
+        22.42,
+        24.864
+      ],
+      "median_ci95": [
+        22.286,
+        25.662
+      ],
+      "min": 21.866,
+      "max": 26.601,
+      "paired_vs": {
+        "mtp_off": {
+          "median_ratio": 0.934,
+          "mad": 0.015,
+          "ci95": [
+            0.912,
+            0.949
+          ],
+          "min": 0.894,
+          "max": 0.993,
+          "cells": 9
+        }
+      }
+    },
+    "dflash2": {
+      "samples": 9,
+      "median_generation_tps": 31.017,
+      "mad": 6.723,
+      "iqr": [
+        24.185,
+        36.662
+      ],
+      "median_ci95": [
+        23.981,
+        37.74
+      ],
+      "min": 23.798,
+      "max": 37.99,
+      "paired_vs": {
+        "baseline": {
+          "median_ratio": 1.279,
+          "mad": 0.239,
+          "ci95": [
+            1.001,
+            1.561
+          ],
+          "min": 0.935,
+          "max": 1.694,
+          "cells": 9
+        },
+        "mtp_off": {
+          "median_ratio": 1.251,
+          "mad": 0.23,
+          "ci95": [
+            0.918,
+            1.481
+          ],
+          "min": 0.873,
+          "max": 1.558,
+          "cells": 9
+        }
+      }
+    },
+    "mtp_off": {
+      "samples": 9,
+      "median_generation_tps": 25.9,
+      "mad": 1.353,
+      "iqr": [
+        24.451,
+        26.785
+      ],
+      "median_ci95": [
+        24.384,
+        27.253
+      ],
+      "min": 23.67,
+      "max": 27.48,
+      "paired_vs": {
+        "baseline": {
+          "median_ratio": 1.071,
+          "mad": 0.017,
+          "ci95": [
+            1.054,
+            1.096
+          ],
+          "min": 1.007,
+          "max": 1.118,
+          "cells": 9
+        }
+      }
+    },
+    "mtp": {
+      "samples": 9,
+      "median_generation_tps": 36.265,
+      "mad": 1.159,
+      "iqr": [
+        33.252,
+        36.761
+      ],
+      "median_ci95": [
+        32.783,
+        37.424
+      ],
+      "min": 30.684,
+      "max": 38.359,
+      "paired_vs": {
+        "baseline": {
+          "median_ratio": 1.505,
+          "mad": 0.122,
+          "ci95": [
+            1.367,
+            1.627
+          ],
+          "min": 1.296,
+          "max": 1.633,
+          "cells": 9
+        },
+        "mtp_off": {
+          "median_ratio": 1.373,
+          "mad": 0.109,
+          "ci95": [
+            1.255,
+            1.532
+          ],
+          "min": 1.21,
+          "max": 1.55,
+          "cells": 9
+        }
+      }
+    }
+  }
+}

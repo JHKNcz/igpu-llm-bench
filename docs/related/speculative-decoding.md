@@ -32,12 +32,16 @@ enabled or disabled.
 
 ## Results
 
-| Mode | Median generation t/s | Paired speedup vs baseline | Paired speedup vs MTP-off | Samples |
-|---|---:|---:|---:|---:|
-| Baseline (regular target, no draft) | 23.78 | 1.00x | 0.93x | 9 |
-| DFlash2, 6 draft tokens | 31.02 | **1.28x** | 1.25x | 9 |
-| MTP-off (MTP weights, speculation off) | 25.90 | 1.07x | 1.00x | 9 |
-| MTP, 2 draft tokens | **36.27** | **1.51x** | **1.37x** | 9 |
+| Mode | Median generation t/s | 95% CI of median | Paired vs baseline | 95% CI | Paired vs MTP-off |
+|---|---:|---|---:|---|---:|
+| Baseline (regular target, no draft) | 23.78 | 22.29–25.66 | 1.00x | — | 0.93x |
+| DFlash2, 6 draft tokens | 31.02 | 23.98–37.74 | 1.28x | 1.00–1.56 | 1.25x |
+| MTP-off (MTP weights, speculation off) | 25.90 | 24.38–27.25 | 1.07x | 1.05–1.10 | 1.00x |
+| MTP, 2 draft tokens | **36.27** | 32.78–37.42 | **1.51x** | **1.37–1.63** | **1.37x** |
+
+Ratios are computed inside each (prompt, round) cell and then summarised across
+the 9 cells. Intervals are a 20,000-sample percentile bootstrap, seeded.
+Regenerate with `python3 scripts/stats.py`.
 
 ### Per-prompt medians
 
@@ -57,6 +61,9 @@ three prompts in this sample.
 - Three short synthetic prompts; this does not measure a filled 32K context.
 - Three rounds; the samples are not independent across prompts.
 - One machine, one Vulkan build, no power or clock control.
+- **DFlash2 is not established at n=9.** The point estimate is 1.28x, but the
+  interval touches 1.00 and the per-cell range is 0.94–1.69. Report it as
+  "probably faster, not proven". MTP is the result that survives.
 - The 1.28x here is not the same workload as the 1.65x short-prompt Vulkan note
   or the 1.51x coding-agent result. Do not average them.
 - The baseline 23.78 t/s is within 6% of the independent `llama-bench` Vulkan

@@ -31,6 +31,10 @@ the owner’s location, or any third party, and that no credential is present.
 | `config/models.json` | New file; paths written as `<models>/...` | No username |
 | `data/provenance.md` | Source paths written as `~/LLM/...` | No username |
 | `README.md`, `RESULTS.md`, `docs/*.md`, `analysis/roofline.md` | New text; no personal names, locations, or paths | Privacy by construction |
+| `docs/glossary.md`, `docs/faq.md`, `docs/references.md`, `docs/reproduction-checklist.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `CITATION.cff` | New text | Privacy by construction |
+| `docs/figures/*.svg` | Generated from processed data | Contains only numeric labels |
+| `scripts/verify_results.py` | Stale-value list assembled from fragments | Prevents the checker from embedding the literals it bans |
+| `data/processed/runs-index.csv` | New index; no paths with a username | Aggregates already-sanitised values |
 
 The llama.cpp relative timestamps at the start of `dflash-rocm-server-2026-10-01.log`
 (such as `0.00.404.0`) look like IPv4 addresses but are **not** network addresses.
@@ -59,7 +63,7 @@ source machine.
 
 | Metric | Result |
 |---|---:|
-| Text files scanned | 44 |
+| Text files scanned | 61 |
 | Unallowlisted matches | **0** |
 | Allowlisted matches | 4 (llama.cpp relative timestamps) |
 | Files dropped before scanning | see table above |

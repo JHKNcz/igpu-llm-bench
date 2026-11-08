@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use these measurements, cite this repository."
+title: "igpu-llm-bench: Vulkan vs ROCm decode throughput on an AMD Strix Point iGPU"
+abstract: >-
+  Archived and re-analysed decode-throughput measurements for a 35B
+  mixture-of-experts model on a Radeon 890M integrated GPU. The headline is a
+  2.32x raw Vulkan-over-ROCm gap at tg128, qualified to a defensible 1.4x-2.3x
+  because the archived runs are not a controlled A/B. Includes a first-order
+  memory roofline and a paired speculative-decoding comparison.
+type: software
+authors:
+  - name: "igpu-llm-bench contributors"
+version: "0.2.0"
+date-released: "2026-11-08"
+license: MIT
+keywords:
+  - llm
+  - benchmark
+  - igpu
+  - vulkan
+  - rocm
+  - llama.cpp
+  - speculative-decoding
+  - roofline
+  - strix-point
+# No repository URL is recorded here on purpose: the repository is private and
+# the account name would identify the owner. Cite the title and version instead.
+references:
+  - type: software
+    title: "llama.cpp"
+    version: "f872b5911"
+    notes: "Measured build; not vendored in this repository."

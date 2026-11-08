@@ -1,0 +1,45 @@
+name: checks
+
+# No GPU and no model weights are needed: these checks only read the archived
+# data and the generated files.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Regenerate derived data
+        run: make data
+
+      - name: Regenerate figures
+        run: make figures
+
+      - name: Check documents against data
+        run: python3 scripts/verify_results.py
+
+      - name: Scan for secrets and personal data
+        run: python3 scripts/secret_scan.py
+
+      - name: Check scripts compile
+        run: python3 -m py_compile scripts/*.py
+
+      - name: Check shell syntax
+        run: bash -n scripts/bench.sh
+
+      - name: Fail if regeneration produced a diff
+        run: |
+          if ! git diff --quiet; then
+            echo "Generated files are stale. Run 'make all' and commit."
+            git diff --stat
+            exit 1
+          fi

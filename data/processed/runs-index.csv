@@ -1,0 +1,36 @@
+run_id,experiment,date_utc,backend,build,model,metric,value,unit,n,source
+llama-bench-rocm-2026-09-30,decode,2026-09-30T21:44:46Z,rocm,unknown (0),Qwen3.6-35B-A3B IQ4_NL,tg128,10.89,t/s,2,data/raw/llama-bench-rocm-2026-09-30.txt:9
+llama-bench-rocm-2026-09-30-d16k,decode,2026-09-30T21:44:46Z,rocm,unknown (0),Qwen3.6-35B-A3B IQ4_NL,tg128@d16384,12.63,t/s,2,data/raw/llama-bench-rocm-2026-09-30.txt:16
+llama-bench-rocm-2026-09-30-d64k,decode,2026-09-30T21:44:46Z,rocm,unknown (0),Qwen3.6-35B-A3B IQ4_NL,tg128@d65536,7.84,t/s,2,data/raw/llama-bench-rocm-2026-09-30.txt:23
+llama-bench-vulkan-2026-10-01,decode,2026-10-01T22:53:02Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B IQ4_NL,tg128,25.31,t/s,2,data/raw/llama-bench-vulkan-2026-10-01.txt:9
+llama-bench-vulkan-2026-10-01-d16k,decode,2026-10-01T22:53:02Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B IQ4_NL,tg128@d16384,19.96,t/s,2,data/raw/llama-bench-vulkan-2026-10-01.txt:16
+llama-bench-vulkan-2026-10-01-d64k,decode,2026-10-01T22:53:02Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B IQ4_NL,tg128@d65536,13.97,t/s,2,data/raw/llama-bench-vulkan-2026-10-01.txt:23
+dflash-rocm-2026-10-01,server,2026-10-01T14:09:21Z,rocm,unknown (0),Qwen3.6-35B-A3B + DFlash1,tg,15.54,t/s,1,data/raw/dflash-rocm-server-2026-10-01.log:486
+session-01b-rocm-baseline-clean,server,2026-10-02T09:00:00Z,rocm,unknown (0),Qwen3.6-35B-A3B,wall_tps,17.93,t/s,3,data/processed/session-summary.csv:2
+session-01c-rocm-baseline-no-graphs,server,2026-10-02T09:00:00Z,rocm,unknown (0),Qwen3.6-35B-A3B,wall_tps,18.17,t/s,3,data/processed/session-summary.csv:3
+session-04-rocm-dflash2-gpu,server,2026-10-02T09:44:03Z,rocm,unknown (0),Qwen3.6-35B-A3B + DFlash2,wall_tps,7.19,t/s,3,data/processed/session-summary.csv:13
+session-04b-rocm-dflash2-gpu-no-graphs,server,2026-10-02T09:44:03Z,rocm,unknown (0),Qwen3.6-35B-A3B + DFlash2,wall_tps,33.84,t/s,3,data/processed/session-summary.csv:14
+session-11-rocm-baseline-confirmation,server,2026-10-02T09:00:00Z,rocm,unknown (0),Qwen3.6-35B-A3B,wall_tps,21.26,t/s,3,data/processed/session-summary.csv:47
+session-11-rocm-dflash2-confirmation,server,2026-10-02T09:00:00Z,rocm,unknown (0),Qwen3.6-35B-A3B + DFlash2,wall_tps,30.32,t/s,3,data/processed/session-summary.csv:48
+session-02r-vulkan-baseline,server,2026-10-02T14:08:06Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B,wall_tps,25.63,t/s,3,data/processed/session-summary.csv:7
+session-05r-vulkan-dflash2-cpu,server,2026-10-02T14:08:06Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B + DFlash2,wall_tps,35.62,t/s,3,data/processed/session-summary.csv:18
+session-05r-vulkan-dflash2-gpu,server,2026-10-02T14:08:06Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B + DFlash2,wall_tps,40.81,t/s,3,data/processed/session-summary.csv:19
+session-14-vulkan-nmax6,server,2026-10-02T14:14:00Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B + DFlash2,wall_tps,42.20,t/s,3,data/raw/historical/vulkan-nmax6-runs-2026-10-02.json
+session-14-vulkan-nmax5,server,2026-10-02T14:14:00Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B + DFlash2,wall_tps,41.23,t/s,3,data/processed/session-summary.csv:55
+rocm-512mb-p1,server,2026-10-02T20:20:24Z,rocm,unknown (0),Qwen3.6-35B-A3B + DFlash2,wall_tps,14.73,t/s,1,docs/historical/2026-10-02-rocm-512mb.md
+rocm-512mb-p2,server,2026-10-02T20:20:24Z,rocm,unknown (0),Qwen3.6-35B-A3B + DFlash2,wall_tps,18.72,t/s,1,docs/historical/2026-10-02-rocm-512mb.md
+rocm-512mb-p3,server,2026-10-02T20:20:24Z,rocm,unknown (0),Qwen3.6-35B-A3B + DFlash2,wall_tps,15.64,t/s,1,docs/historical/2026-10-02-rocm-512mb.md
+rocm-512mb-p4,server,2026-10-02T20:20:24Z,rocm,unknown (0),Qwen3.6-35B-A3B + DFlash2,wall_tps,15.18,t/s,1,docs/historical/2026-10-02-rocm-512mb.md
+spec-baseline,speculative,2026-10-18T18:08:21Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B,generation_tps,23.78,t/s,9,data/processed/speculative-stats.json
+spec-dflash2,speculative,2026-10-18T18:08:21Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B + DFlash2,generation_tps,31.02,t/s,9,data/processed/speculative-stats.json
+spec-mtp_off,speculative,2026-10-18T18:08:21Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B MTP,generation_tps,25.90,t/s,9,data/processed/speculative-stats.json
+spec-mtp,speculative,2026-10-18T18:08:21Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B MTP,generation_tps,36.27,t/s,9,data/processed/speculative-stats.json
+long-4k-mtp-f16,long_context,2026-10-18T18:39:23Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B MTP,generation_tps,33.67,t/s,2,data/processed/long-context-summary.json
+long-32k-mtp-f16,long_context,2026-10-18T18:39:23Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B MTP,generation_tps,25.40,t/s,2,data/processed/long-context-summary.json
+long-61k-mtp-f16,long_context,2026-10-18T18:39:23Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B MTP,generation_tps,21.99,t/s,2,data/processed/long-context-summary.json
+long-61k-dflash2-f16,long_context,2026-10-18T18:39:23Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B + DFlash2,generation_tps,22.13,t/s,2,data/processed/long-context-summary.json
+agent-qwen-raw,coding_agent,2026-10-13T19:30:47Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B,wall_tps,24.55,t/s,3,data/processed/agent-bench-summary.csv
+agent-qwen-dflash2-n3,coding_agent,2026-10-13T19:30:47Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B + DFlash2,wall_tps,36.99,t/s,3,data/processed/agent-bench-summary.csv
+agent-qwen-dflash2-n6,coding_agent,2026-10-13T19:30:47Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B + DFlash2,wall_tps,33.55,t/s,3,data/processed/agent-bench-summary.csv
+coder-dflash6-off,coding_quality,2026-10-02T22:00:00Z,rocm,unknown (0),Qwen3.6-35B-A3B + DFlash2,acceptance_checks,24,checks,1,docs/related/coding-quality.md
+coder-baseline-off,coding_quality,2026-10-02T22:00:00Z,rocm,unknown (0),Qwen3.6-35B-A3B,acceptance_checks,22,checks,1,docs/related/coding-quality.md
