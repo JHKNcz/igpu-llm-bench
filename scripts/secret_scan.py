@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import getpass
+import os
 import re
 import socket
 import sys
@@ -77,15 +78,24 @@ def main() -> int:
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
 
-    username = getpass.getuser()
-    hostname = socket.gethostname()
+    # Identity checks only make sense for a real workstation account. In CI the
+    # "user" is `runner`, which collides with ordinary words in the docs
+    # ("runner.py", "the second runner"). Skip those rather than fail on noise.
+    generic = {
+        "runner", "root", "ubuntu", "user", "ci", "jenkins", "buildkite",
+        "circleci", "codespace", "vscode", "node", "docker", "builder",
+    }
+    username = os.environ.get("IGPU_SCAN_USER", getpass.getuser())
+    hostname = os.environ.get("IGPU_SCAN_HOST", socket.gethostname())
     extra = {
-        "username": re.compile(re.escape(username), re.IGNORECASE),
-        "hostname": re.compile(re.escape(hostname), re.IGNORECASE),
         "location": re.compile(r"\b(?:Pr[a]gue|Pr[a]ha|Cz[e]ch|Eur[o]pe/)\b", re.IGNORECASE),
         "container": re.compile(r"\belegant_margulis\b"),
         "home_path": re.compile(r"/home/(?!user\b)[A-Za-z0-9._-]+"),
     }
+    if username.lower() not in generic and len(username) > 2:
+        extra["username"] = re.compile(re.escape(username), re.IGNORECASE)
+    if hostname.lower() not in generic and len(hostname) > 3:
+        extra["hostname"] = re.compile(re.escape(hostname), re.IGNORECASE)
 
     files = [
         p for p in sorted(args.root.rglob("*"))

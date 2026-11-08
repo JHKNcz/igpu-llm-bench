@@ -75,6 +75,12 @@ password/API-key assignments, Bearer tokens, emails, IPv4, MAC addresses, UUIDs,
 the current username, the current hostname, location words, the old container
 name, and `/home/` paths.
 
+The username and hostname checks are skipped when the scan runs under a generic
+CI account (`runner`, `root`, `ubuntu`, and similar), because those words occur
+legitimately in the documentation. Override with `IGPU_SCAN_USER` and
+`IGPU_SCAN_HOST` when running on a workstation. This behaviour was added after
+CI flagged `runner.py` as a username.
+
 Known false-positive classes:
 
 - llama.cpp relative timestamps (`0.00.404.0`) that resemble IPv4 addresses.
