@@ -1,0 +1,46 @@
+{
+  "baseline": {
+    "samples": 9,
+    "median_generation_tps": 23.781811670434454,
+    "median_paired_speedup": 1.0,
+    "median_paired_speedup_vs_mtp_off": 0.9338394964198918,
+    "by_case": {
+      "stock_research": 23.781811670434454,
+      "python_analysis": 24.255999531240917,
+      "structured_extraction": 23.48826314518344
+    }
+  },
+  "dflash2": {
+    "samples": 9,
+    "median_generation_tps": 31.01730936153484,
+    "median_paired_speedup": 1.2787479370448362,
+    "median_paired_speedup_vs_mtp_off": 1.2514017824193004,
+    "by_case": {
+      "stock_research": 23.98143329221066,
+      "python_analysis": 31.01730936153484,
+      "structured_extraction": 37.740188549982
+    }
+  },
+  "mtp_off": {
+    "samples": 9,
+    "median_generation_tps": 25.89961289727594,
+    "median_paired_speedup": 1.070847831810232,
+    "median_paired_speedup_vs_mtp_off": 1.0,
+    "by_case": {
+      "stock_research": 25.932639409801602,
+      "python_analysis": 25.89961289727594,
+      "structured_extraction": 24.751725632071715
+    }
+  },
+  "mtp": {
+    "samples": 9,
+    "median_generation_tps": 36.26523281995037,
+    "median_paired_speedup": 1.5051376178295657,
+    "median_paired_speedup_vs_mtp_off": 1.373216054980502,
+    "by_case": {
+      "stock_research": 32.78313378475494,
+      "python_analysis": 36.37140597021652,
+      "structured_extraction": 37.424265394691716
+    }
+  }
+}

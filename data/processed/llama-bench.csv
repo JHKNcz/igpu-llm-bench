@@ -1,0 +1,7 @@
+backend,model,size_gib,params_b,ngl,fa,test,depth,tps,tps_sd,build,source_file,source_line
+ROCm,qwen35moe 35B.A3B IQ4_NL - 4.5 bpw,16.79,34.66,999,1,tg128,0,10.89,1.61,unknown (0),data/raw/llama-bench-rocm-2026-09-30.txt,9
+ROCm,qwen35moe 35B.A3B IQ4_NL - 4.5 bpw,16.79,34.66,999,1,tg128 @ d16384,16384,12.63,1.65,unknown (0),data/raw/llama-bench-rocm-2026-09-30.txt,16
+ROCm,qwen35moe 35B.A3B IQ4_NL - 4.5 bpw,16.79,34.66,999,1,tg128 @ d65536,65536,7.84,0.85,unknown (0),data/raw/llama-bench-rocm-2026-09-30.txt,23
+Vulkan,qwen35moe 35B.A3B IQ4_NL - 4.5 bpw,16.79,34.66,999,1,tg128,0,25.31,0.75,f872b5911 (11310),data/raw/llama-bench-vulkan-2026-10-01.txt,9
+Vulkan,qwen35moe 35B.A3B IQ4_NL - 4.5 bpw,16.79,34.66,999,1,tg128 @ d16384,16384,19.96,0.12,f872b5911 (11310),data/raw/llama-bench-vulkan-2026-10-01.txt,16
+Vulkan,qwen35moe 35B.A3B IQ4_NL - 4.5 bpw,16.79,34.66,999,1,tg128 @ d65536,65536,13.97,0.09,f872b5911 (11310),data/raw/llama-bench-vulkan-2026-10-01.txt,23

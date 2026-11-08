@@ -1,0 +1,7 @@
+backend,test,depth,tps,active_weight_gb,kv_gb,total_gb_per_token,effective_gbps,peak_gbps,pct_peak,source_file,source_line
+ROCm,tg128,0,10.89,1.5604,0.0,1.5604,16.993,120.0,14.2,data/raw/llama-bench-rocm-2026-09-30.txt,9
+ROCm,tg128 @ d16384,16384,12.63,1.5604,0.3355,1.896,23.946,120.0,20.0,data/raw/llama-bench-rocm-2026-09-30.txt,16
+ROCm,tg128 @ d65536,65536,7.84,1.5604,1.3422,2.9026,22.756,120.0,19.0,data/raw/llama-bench-rocm-2026-09-30.txt,23
+Vulkan,tg128,0,25.31,1.5604,0.0,1.5604,39.494,120.0,32.9,data/raw/llama-bench-vulkan-2026-10-01.txt,9
+Vulkan,tg128 @ d16384,16384,19.96,1.5604,0.3355,1.896,37.844,120.0,31.5,data/raw/llama-bench-vulkan-2026-10-01.txt,16
+Vulkan,tg128 @ d65536,65536,13.97,1.5604,1.3422,2.9026,40.549,120.0,33.8,data/raw/llama-bench-vulkan-2026-10-01.txt,23

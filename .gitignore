@@ -1,0 +1,38 @@
+# Model weights (never commit)
+*.gguf
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Build outputs and vendored source
+build/
+build-*/
+llama.cpp/
+llama.cpp-managed/
+node_modules/
+.venv/
+venv/
+
+# Caches
+__pycache__/
+*.pyc
+.pytest_cache/
+.cache/
+
+# Local run outputs
+runs/
+
+# Secrets and local configuration
+.env
+.env.*
+secrets*
+*.key
+*.pem
+*.p12
+*.pfx
+credentials*
+
+# Editor/OS noise
+.DS_Store
+*.swp

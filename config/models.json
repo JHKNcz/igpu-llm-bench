@@ -1,0 +1,93 @@
+{
+  "hardware": "AMD Ryzen AI 9 HX 375 / Radeon 890M (gfx1150)",
+  "llama_cpp_commit": "f872b591121761ac7b2af18283bd99bdc092a63a",
+  "models": {
+    "target_qwen35": {
+      "role": "target",
+      "file": "<models>/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf",
+      "quant": "UD-IQ4_NL",
+      "size_gib": 16.79,
+      "bytes": 18040888288,
+      "sha256": "0d17e255dc257a11f398ed4bc8d62412d8ce9ca24b3fce2947d962e4bfed5758",
+      "present": false,
+      "notes": "Exact target used for the archived 35B runs. The file is not in this repository and was absent from the source machine on 2026-11-05."
+    },
+    "draft_dflash2": {
+      "role": "draft",
+      "file": "<models>/Qwen3.6-35B-A3B-DFlash2-BF16.gguf",
+      "quant": "BF16",
+      "size_gib": 0.99,
+      "bytes": 1063708928,
+      "sha256": "3aa9bae5332415f5563918a8b31c82e913add862446159f41a20e756c49b065f",
+      "present": false,
+      "notes": "GGUF draft is missing; the source machine retains the BF16 safetensors and config only."
+    },
+    "draft_dflash1": {
+      "role": "draft",
+      "file": "<models>/Qwen3.6-35B-A3B-DFlash-BF16.gguf",
+      "quant": "BF16",
+      "size_gib": 0.72,
+      "bytes": null,
+      "sha256": "6ce38bc63e6b622ce1c6fff4ac8eb5fa08dfab802b1bf1841890abcca1bb46fd",
+      "present": false,
+      "notes": "Older DFlash draft used by dflash-rocm.log; block_size=16, not DFlash2. The log reports 736.12 MiB; exact bytes were not recorded."
+    },
+    "mtp_qwen35": {
+      "role": "target_with_mtp",
+      "file": "<models>/Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf",
+      "quant": "UD-IQ4_NL",
+      "size_gib": 17.26,
+      "bytes": 18536192288,
+      "sha256": null,
+      "present": true,
+      "notes": "MTP-capable target used by the 2026-10-18 speculative comparison. SHA256 was not recorded."
+    },
+    "lfm_iq4_nl": {
+      "role": "small_target",
+      "file": "<models>/LFM2.5-8B-A1B/LFM2.5-8B-A1B-UD-IQ4_NL.gguf",
+      "quant": "UD-IQ4_NL",
+      "size_gib": 4.06,
+      "bytes": 4358844000,
+      "sha256": null,
+      "present": true,
+      "notes": "Present on the source machine; useful for a short harness smoke test."
+    },
+    "lfm_q8_k_xl": {
+      "role": "small_target",
+      "file": "<models>/LFM2.5-8B-A1B/LFM2.5-8B-A1B-UD-Q8_K_XL.gguf",
+      "quant": "UD-Q8_K_XL",
+      "size_gib": 8.70,
+      "bytes": 9340497504,
+      "sha256": null,
+      "present": true,
+      "notes": "Present on the source machine."
+    }
+  },
+  "binaries": {
+    "vulkan_server_sha256": "936fd4c733d6f7608fd0105b0027a6983f572e2fd681e16d2182948119b16af5",
+    "rocm_server_sha256": "8277bb4239251b4198514e7febcfee0a0733bef98076ade09ecb764736f5f934",
+    "vulkan_llama_bench_sha256": "932de2472c76af83afaa29920a3758fb0ca7b9d9ad23b8f86423fafa2f8f8d79",
+    "vulkan_llama_bench_impl_sha256": "79fb4bea7fe7d742583b73051fb00db80108d77c621c591a695bc99e87aa3428",
+    "rocm_llama_bench_sha256": null,
+    "notes": "The Vulkan and ROCm llama-server hashes match the archived 2026-10-02 hash file exactly. The archived llama-bench binary hash was not recorded."
+  },
+  "roofline": {
+    "target_model": "target_qwen35",
+    "total_params_b": 34.66,
+    "active_params_b": 3.0,
+    "size_gib": 16.79,
+    "layers_total": 40,
+    "attention_layers": 10,
+    "ssm_layers": 30,
+    "full_attention_interval": 4,
+    "kv_heads": 2,
+    "head_dim": 256,
+    "kv_bytes_per_element": 2,
+    "kv_bytes_per_token": 20480,
+    "kv_cache_mib_at_16k": 320,
+    "ssm_state_mib": 1067.81,
+    "peak_gbps": 120.0,
+    "peak_gbps_sensitivity": [102.4, 128.0],
+    "notes": "Active parameter count is the vendor 'A3B' label, not an independently measured activation count. The model is hybrid: 10 full-attention layers (full_attention_interval=4) use F16 K/V with 2 KV heads and head_dim 256, giving 2 * 2 * 256 * 2 * 10 = 20,480 bytes/token. The 30 SSM/recurrent layers use a 1,067.81 MiB state; its per-token traffic is not modeled. Peak assumes LPDDR5X-7500, 128-bit; exact RAM speed was not recorded."
+  }
+}

@@ -1,0 +1,5 @@
+8277bb4239251b4198514e7febcfee0a0733bef98076ade09ecb764736f5f934  <llama.cpp>/build-rocm/bin/llama-server
+936fd4c733d6f7608fd0105b0027a6983f572e2fd681e16d2182948119b16af5  <llama.cpp>/build-vulkan/bin/llama-server
+0d17e255dc257a11f398ed4bc8d62412d8ce9ca24b3fce2947d962e4bfed5758  <models>/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf
+6ce38bc63e6b622ce1c6fff4ac8eb5fa08dfab802b1bf1841890abcca1bb46fd  <models>/Qwen3.6-35B-A3B-DFlash-BF16.gguf
+3aa9bae5332415f5563918a8b31c82e913add862446159f41a20e756c49b065f  <models>/Qwen3.6-35B-A3B-DFlash2-BF16.gguf

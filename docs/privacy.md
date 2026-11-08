@@ -1,0 +1,102 @@
+# Privacy and redaction
+
+This repository is private. The goal is that nothing in it identifies the owner,
+the owner’s location, or any third party, and that no credential is present.
+
+## Rules applied
+
+| Category | Replacement |
+|---|---|
+| IPv4 / IPv6 addresses | `[IP_ADDRESS]` / `2001:db8::1` |
+| Hostnames and machine names | `workstation` |
+| `/home/<user>` and real usernames | `/home/user` or `<llm-root>` |
+| Emails, phone numbers, domains | `[EMAIL]` / `example.com` |
+| MAC addresses, serial numbers, UUIDs, disk IDs | removed |
+| Tokens, keys, passwords | line removed; file reported; value never printed |
+| Absolute model paths | `<models>/<filename>.gguf` |
+| Personal notes, names, school/location | removed |
+
+## Redaction log
+
+| File | Change | Why |
+|---|---|---|
+| `data/raw/dflash-rocm-server-2026-10-01.log` | `/LLM/LLMs/` → `<models>/`; `/LLM/llama.cpp-managed/` → `<llama.cpp>/`; bind address → `[IP_ADDRESS]` (port 11434 preserved) | Remove absolute paths and the bind address |
+| `data/raw/build-config-2026-10-02.txt` | `/home/<user>/LLM/...` → `<llm-root>/...` | Remove the username |
+| `data/raw/historical/model-binary-sha256-2026-10-02.txt` | `/home/<user>/LLM/...` → `<llm-root>/...` | Remove the username; hashes kept |
+| `docs/historical/2026-10-02-rocm-server.md` | Paths → `<llm-root>` / `<models>`; container name → `[container]`; container metadata reference → original source bundle (not included); “the user” → “the operator” | Remove local identifiers and personal framing |
+| `docs/historical/2026-10-02-vulkan-post-reboot.md` | date/location line → `2026-10-02 (local time, UTC+2)`; paths → `<llm-root>`; launcher marked “not included” | Remove location and dead local paths |
+| `docs/historical/2026-10-02-rocm-512mb.md` | Unrelated generated-code quality review removed; performance section retained | Keep the benchmark evidence, drop unrelated material |
+| `docker/rocm-ubuntu26.04.Dockerfile` | Comments translated to English; language reference removed | Remove a location/language marker; commands unchanged |
+| `docs/related/coding-quality.md` | Header added; original review body unchanged | Identify the experiment and its scope |
+| `config/models.json` | New file; paths written as `<models>/...` | No username |
+| `data/provenance.md` | Source paths written as `~/LLM/...` | No username |
+| `README.md`, `RESULTS.md`, `docs/*.md`, `analysis/roofline.md` | New text; no personal names, locations, or paths | Privacy by construction |
+
+The llama.cpp relative timestamps at the start of `dflash-rocm-server-2026-10-01.log`
+(such as `0.00.404.0`) look like IPv4 addresses but are **not** network addresses.
+They were preserved; the scanner allowlists them only at the start of a log line.
+
+## Files dropped, not copied
+
+| Source | Reason |
+|---|---|
+| `historical/2026-10-02-qwen/06_SOURCE_CONVERSATION.md`, `evidence/source-thread.json` | Conversation export; personal material |
+| `coder_benchmark/runner.py`, `grader/`, `runs/` | Local container name/image ID and model outputs; not needed |
+| `speculative_compare/benchmark.py`, `long_context.py`, tests, manifests | Local hostname, paths, and prompts; results summarized |
+| `llama-agent-bench/bench.py`, `run.sh`, `runs/` | Harness code and model outputs; only `summary.csv` used |
+| `historical/2026-10-02-qwen/09_*`, `10_*` | Unrelated generated-code quality reviews |
+| `historical/2026-10-02-qwen/01_*`, `03_*`, `05_*`, `04_*`, `02_*` | Research narrative, test plan, mixed proposed commands |
+| `evidence/speculative-source-excerpts.txt` | Upstream source excerpts |
+| `testing_resources/OpenCodeAutoIteration/`, `local_qwen_worker/`, `cursor_qwen_trial/`, `implementation/` | Private/unrelated work |
+| `testing_archive/` | Cleanup archive |
+| `llama.cpp/`, `llama.cpp-managed/`, `LLMs/` | Vendored source, builds, model weights |
+
+## Scan results
+
+**Tool:** `scripts/secret_scan.py` (strict regex pass) plus `rg` spot checks and a
+manual read of every file. `gitleaks` and `trufflehog` are not installed on the
+source machine.
+
+| Metric | Result |
+|---|---:|
+| Text files scanned | 44 |
+| Unallowlisted matches | **0** |
+| Allowlisted matches | 4 (llama.cpp relative timestamps) |
+| Files dropped before scanning | see table above |
+| Secrets found | 0 |
+| Personal names/emails found | 0 |
+
+Categories checked: GitHub/OpenAI/AWS/Slack token prefixes, private-key headers,
+password/API-key assignments, Bearer tokens, emails, IPv4, MAC addresses, UUIDs,
+the current username, the current hostname, location words, the old container
+name, and `/home/` paths.
+
+Known false-positive classes:
+
+- llama.cpp relative timestamps (`0.00.404.0`) that resemble IPv4 addresses.
+- SHA256 hashes: 64 hex characters, not UUIDs and not secrets.
+- Public Hugging Face URLs in the model metadata.
+- PCI bus IDs and hardware model numbers in the server log.
+- The documentation placeholder `/home/user`.
+
+## Manual review
+
+Every file in the repository was reviewed on 2026-11-05 after the automated
+scan: documentation and logs were read end-to-end, and the CSV/JSON data was
+inspected and scanned line by line. No credential, personal name, email
+address, location, or identifying hostname was found. The only personal-looking
+token in the source material was the username in absolute paths; those paths
+were replaced.
+
+## Residual risk
+
+- The private GitHub repository owner is visible to anyone with repository
+  access. That is inherent to GitHub private repos; the content itself does not
+  name the owner.
+- The commit author will be a generic identity, not the owner’s GitHub account.
+- Model hashes, binary hashes, and hardware identifiers are not personal, but
+  they are specific to this machine. They are included for reproducibility.
+- The original source paths remain on the owner’s machine; they are not in the
+  repository.
+- The repository must remain private. Do not change its visibility without the
+  owner’s explicit instruction.
