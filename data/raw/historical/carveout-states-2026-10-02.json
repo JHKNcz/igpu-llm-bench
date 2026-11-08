@@ -1,0 +1,40 @@
+{
+  "description": "The two BIOS VRAM carve-out settings used on this machine, with the memory each one exposes. Values are read from server logs and a JSON recorded on the day; none is inferred.",
+  "machine": "AMD Ryzen AI 9 HX 375 / Radeon 890M (gfx1150), 32 GB LPDDR5X",
+  "settings": {
+    "small": {
+      "label": "0.5 GB carve-out",
+      "bios_reserved_vram_mib": 512,
+      "rocm_reported_vram_mib": 15438,
+      "rocm_reported_vram_note": "This is the GTT/UMA aperture the ROCm device exposes, not the 512 MiB dedicated carve-out.",
+      "gtt_mib": 15438,
+      "host_visible_mib": 30877,
+      "gpu_addressable_total_mib": 15950,
+      "gpu_addressable_total_gib": 15.58,
+      "full_offload_35b": "works, via HIP unified memory oversubscribing into host RAM",
+      "source": [
+        "data/raw/dflash-rocm-server-2026-10-01.log:5-6",
+        "data/raw/historical/post-reboot-memory-2026-10-02.json"
+      ]
+    },
+    "large": {
+      "label": "16 GB carve-out",
+      "bios_reserved_vram_mib": 16384,
+      "rocm_reported_vram_mib": 16384,
+      "gtt_mib": 7638,
+      "gtt_gib": 7.46,
+      "host_visible_mib": 15277,
+      "host_visible_gib": 14.92,
+      "gpu_addressable_total_mib": 24022,
+      "gpu_addressable_total_gib": 23.46,
+      "gpu_addressable_note": "Vulkan reports a 24,022 MiB total budget with this setting. That is the '24 GB usable' figure.",
+      "full_offload_35b": "ROCm fails: the 16,679.34 MiB weight buffer exceeds the 16,384 MiB pool, and host RAM is too small to rescue it via unified memory. Vulkan succeeds.",
+      "source": [
+        "data/raw/historical/rocm-16gb-load-failure-2026-10-02.log:6-7,159-161",
+        "docs/historical/2026-10-02-vulkan-post-reboot.md"
+      ]
+    }
+  },
+  "consequence": "The carve-out is a capacity trade-off, not a quality setting. Raising it from 0.5 GB to 16 GB moves about 15.5 GiB out of host RAM and into the GPU pool. Vulkan benefits; ROCm's full-offload path for this 16.79 GiB model does not, because one contiguous 16,679 MiB allocation cannot fit in a 16,384 MiB pool and the remaining host RAM is too small to back it.",
+  "status": "Operator-confirmed on 2026-11-08 that both settings were used. The per-run setting of the two archived llama-bench files (2026-09-30 ROCm, 2026-10-01 Vulkan) is not recorded in those files."
+}

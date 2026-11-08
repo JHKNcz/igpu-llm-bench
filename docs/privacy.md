@@ -22,6 +22,8 @@ the owner’s location, or any third party, and that no credential is present.
 |---|---|---|
 | `data/raw/dflash-rocm-server-2026-10-01.log` | `/LLM/LLMs/` → `<models>/`; `/LLM/llama.cpp-managed/` → `<llama.cpp>/`; bind address → `[IP_ADDRESS]` (port 11434 preserved) | Remove absolute paths and the bind address |
 | `data/raw/build-config-2026-10-02.txt` | `/home/<user>/LLM/...` → `<llm-root>/...` | Remove the username |
+| `data/raw/historical/rocm-16gb-load-failure-2026-10-02.log` | `/LLM/LLMs/` → `<models>/`; `/LLM/...` → `<llm-root>/` | Remove absolute paths |
+| `data/raw/historical/carveout-states-2026-10-02.json` | New file; values only, no paths | Privacy by construction |
 | `data/raw/historical/model-binary-sha256-2026-10-02.txt` | `/home/<user>/LLM/...` → `<llm-root>/...` | Remove the username; hashes kept |
 | `docs/historical/2026-10-02-rocm-server.md` | Paths → `<llm-root>` / `<models>`; container name → `[container]`; container metadata reference → original source bundle (not included); “the user” → “the operator” | Remove local identifiers and personal framing |
 | `docs/historical/2026-10-02-vulkan-post-reboot.md` | date/location line → `2026-10-02 (local time, UTC+2)`; paths → `<llm-root>`; launcher marked “not included” | Remove location and dead local paths |
@@ -63,7 +65,7 @@ source machine.
 
 | Metric | Result |
 |---|---:|
-| Text files scanned | 61 |
+| Text files scanned | 63 |
 | Unallowlisted matches | **0** |
 | Allowlisted matches | 4 (llama.cpp relative timestamps) |
 | Files dropped before scanning | see table above |

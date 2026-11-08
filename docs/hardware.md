@@ -24,7 +24,8 @@ Collected 2026-11-05 on the source machine. Commands are listed at the end.
   this machine, so the exact LPDDR5X speed is not recorded. The roofline uses
   120 GB/s as a central assumption (LPDDR5X-7500, 128-bit) and reports 102.4 and
   128 GB/s as sensitivity bounds. Confirm with `sudo dmidecode -t memory`.
-- **BIOS version and the per-run VRAM carve-out.** See the conflict below.
+- **BIOS version, and which carve-out each archived run used.** Both settings
+  are documented below, but the per-run mapping is not recorded in the logs.
 - **Mesa/Vulkan driver version at the time of the archived runs.** The current
   Mesa is 26.0.8; the archived logs do not record the Mesa version.
 
@@ -46,7 +47,8 @@ ggml_vulkan: 0 = AMD Radeon 890M Graphics (RADV STRIX1) (radv) | uma: 1 | fp16: 
 The 2026-10-02 Vulkan note reports 16 GiB reserved VRAM, approximately 7.46 GiB
 GTT, a Vulkan budget of 24,022 MiB total / 22,996 MiB free, and approximately
 14 GiB host-visible RAM after the reservation. A JSON recorded earlier that day
-(15:31 +0200) reports 512 MiB VRAM and 15.08 GiB GTT.
+(15:31 +0200) reports the other setting: 512 MiB VRAM and 15.08 GiB GTT. Both
+are correct; see the two-setting table below.
 
 ### The 15,438 MiB figure is not a 15.4 GB dedicated carve-out
 
@@ -54,23 +56,65 @@ GTT, a Vulkan budget of 24,022 MiB total / 22,996 MiB free, and approximately
 rounding, not a dedicated VRAM carve-out. The current `mem_info_gtt_total` is
 16,188,944,384 bytes (15,438.98 MiB); the 2026-10-02 JSON records 16,188,948,480
 bytes. The ROCm device therefore reports the shared UMA/GTT pool, not a 15.4 GB
-dedicated allocation. The dedicated carve-out at the time of the
-ROCm run is best described as **512 MiB, with ~15.08 GiB GTT**, matching the
-15:31 JSON and the 2026-10-02 ROCm comparison note.
+dedicated allocation. At the 0.5 GB setting the dedicated carve-out is
+**512 MiB, with ~15.08 GiB GTT**, matching the 15:31 JSON and the 2026-10-02 ROCm
+comparison note.
 
-### The carve-out records conflict
+### Two carve-out settings, and why the records looked contradictory
 
-| Record | Dedicated VRAM | GTT | When |
-|---|---:|---:|---|
-| `post-reboot-memory-2026-10-02.json` | 512 MiB | 15.08 GiB | 2026-10-02 15:31 +0200 |
-| `2026-10-02-vulkan-post-reboot.md` | 16 GiB | ~7.46 GiB | 2026-10-02 16:08 run |
-| `vulkan-16gb-device-detection-2026-10-01.txt` | not recorded | not recorded | 2026-10-01 00:41 |
-| Current sysfs | 512 MiB | 15.08 GiB | 2026-11-05 |
+The records do not contradict each other. They are two different BIOS settings,
+both of which the operator used, each with its own memory profile:
 
-The 15:31 JSON and the 16:08 note disagree. The machine may have been rebooted
-between them, or the note may describe a different boot. **The exact carve-out
-for each archived run is unresolved.** This is one of the reasons the Vulkan vs
-ROCm comparison is not a controlled A/B.
+| Setting | GPU pool | GTT | Host-visible RAM | GPU-addressable total | 35B full offload |
+|---|---:|---:|---:|---:|---|
+| **0.5 GB** | 512 MiB | 15,438 MiB | 30,877 MiB | 15,950 MiB (15.58 GiB) | ROCm works, via unified memory into host RAM |
+| **16 GB** | 16,384 MiB | 7,638 MiB | 15,277 MiB | 24,022 MiB (23.46 GiB) | ROCm **fails**; Vulkan works |
+
+The 24,022 MiB figure is the "24 GB usable for inference" the operator reports,
+and it matches the Vulkan budget recorded in
+[`2026-10-02-vulkan-post-reboot.md`](historical/2026-10-02-vulkan-post-reboot.md)
+("Vulkan reports 24,022 MiB total budget and 22,996 MiB free before the run").
+
+The cost of that 24 GB is host RAM: raising the carve-out from 0.5 GB to 16 GB
+moves roughly 15.5 GiB out of the host and into the GPU pool, leaving 14.92 GiB
+for everything else.
+
+#### Why ROCm cannot fully offload the 35B model at 16 GB
+
+This is a measured capability difference, not a speed difference. At the 16 GB
+setting, ROCm reports a 16,384 MiB device pool with 16,210 MiB free, and the
+target's weight buffer is 16,679.34 MiB:
+
+```text
+ROCm0 : AMD Radeon 890M Graphics (16384 MiB, 16210 MiB free)
+CPU   : AMD Ryzen AI 9 HX 375 w/ Radeon 890M (15277 MiB, 15277 MiB free)
+...
+E ggml_backend_cuda_buffer_type_alloc_buffer: allocating 16679.34 MiB on device 0: cudaMalloc failed: out of memory
+E alloc_tensor_range: failed to allocate ROCm0 buffer of size 17489553920
+E llama_model_load: error loading model: unable to allocate ROCm0 buffer
+```
+
+The buffer is 295 MiB larger than the entire pool, and host RAM is only 15,277
+MiB, so the unified-memory fallback has nothing to fall back to. At the 0.5 GB
+setting the same model loads, because HIP unified memory can oversubscribe into
+30 GiB of host RAM. That is why the *smaller* carve-out is the one that works for
+ROCm on this model.
+
+Source: `data/raw/historical/rocm-16gb-load-failure-2026-10-02.log` lines 6–7 and
+159–161; `data/raw/historical/carveout-states-2026-10-02.json`.
+
+> **Hypothesis, not measured:** the 16,679 MiB allocation must be contiguous
+> within one pool and cannot span VRAM and GTT. The OOM message shows the
+> allocation failing as a single buffer; it does not show why the allocator did
+> not split it. Treat the mechanism as plausible and the failure as observed.
+
+### What this means for the headline comparison
+
+The carve-out is a capacity trade-off, not a quality setting, and it is a real
+confound for any cross-setting comparison. The two archived `llama-bench` files
+do not record which setting they ran under, so the 2.32x ratio cannot be
+attributed to the backend alone. The defensible statement remains: Vulkan was
+faster in every archived same-machine comparison, by roughly 1.4x–2.3x.
 
 ## Build provenance
 

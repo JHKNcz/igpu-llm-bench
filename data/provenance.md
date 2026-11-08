@@ -19,6 +19,8 @@ the table says so.
 | `data/raw/historical/model-binary-sha256-2026-10-02.txt` | `.../runs/2026-10-02-qwen/model-binary-sha256.txt` | 2026-10-02 | Paths → `<llm-root>/...`; hashes unchanged | Target, DFlash1/2, and server binary SHA256 values |
 | `data/raw/historical/post-reboot-memory-2026-10-02.json` | `.../runs/2026-10-02-qwen/post-reboot-memory.json` | recorded 2026-10-02T15:31:18+0200 | Byte-for-byte copy | 512 MiB VRAM / 15.08 GiB GTT record |
 | `data/raw/historical/vulkan-nmax6-runs-2026-10-02.json` | `.../runs/2026-10-02-qwen/selected-vulkan-config.json` | started 2026-10-02T16:14:00+0200 | Byte-for-byte copy | Per-run Vulkan DFlash2 nmax6: 37.98, 42.20, 43.14 t/s; 91–94 °C; 45–52 W |
+| `data/raw/historical/rocm-16gb-load-failure-2026-10-02.log` | `.../runs/2026-10-02-qwen/18-rocm-post-reboot-smoke-dflash6/server.log` | started 2026-10-02T20:51:35+0200 | `/LLM/LLMs/` → `<models>/`; `/LLM/...` → `<llm-root>/` | ROCm full-offload OOM at the 16 GB carve-out: 16,679.34 MiB buffer vs a 16,384 MiB pool |
+| `data/raw/historical/carveout-states-2026-10-02.json` | New synthesis of the two server logs, `post-reboot-memory.json`, and the 2026-10-02 Vulkan note | 2026-11-08 | New JSON; values read from the logs, arithmetic checked by `verify_results.py` | The two BIOS carve-out settings and the memory each exposes |
 | `data/raw/historical/rocm-dflash2-runs-2026-10-02.json` | `.../runs/2026-10-02-qwen/selected-performance-config.json` | started 2026-10-02T11:44:03+0200 | Byte-for-byte copy | Per-run ROCm DFlash2 no-graphs: 26.77, 33.84, 38.83 t/s |
 | `config/dflash2-config.json` | `.../evidence/dflash2-config.json` | 2026-10-02 bundle | Byte-for-byte copy | Draft architecture: block size 8, 6 layers, 8 target layers |
 | `config/models.json` | New synthesis of `find`, `model-binary-sha256.txt`, and the 2026-10-18 manifests | 2026-11-05 (presence check) | New JSON; no paths with a username | Expected model files, sizes, SHA256, and current presence |
@@ -76,7 +78,7 @@ the table says so.
 | DFlash2 draft GGUF | Not present | Re-convert from the retained BF16 safetensors/config; verify SHA256 `3aa9bae5…` |
 | DFlash1 draft GGUF | Not present | Re-download/convert; SHA256 `6ce38bc6…` |
 | Exact archived `llama-bench` CLI | Not recorded | The wrapper reconstructs the flags from the log header; a fresh run is the only proof |
-| BIOS version and per-run VRAM carve-out | Conflicting records | A BIOS screenshot or `dmidecode`/vendor tool output at run time |
+| BIOS version and per-run VRAM carve-out | Both settings documented; the per-run mapping is not recorded | A BIOS screenshot or vendor tool output at each run, or a run log that prints the carve-out |
 | RAM type/speed/part number | Not recorded | `sudo dmidecode -t memory` or the laptop specification |
 | ROCm runtime/image version | Unresolved | The original container image digest and `hipconfig --version` output |
 | Wall power and locked clocks | Not recorded | A wall meter and fixed power/clock settings |

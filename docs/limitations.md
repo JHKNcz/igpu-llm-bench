@@ -15,12 +15,17 @@ least four ways:
    The source tree is the same commit, but source identity does not prove binary
    provenance.
 2. **Memory carve-out.** The ROCm log’s 15,438 MiB is the UMA/GTT total, not a
-   15.4 GB dedicated allocation. The dedicated carve-out records conflict: a
-   2026-10-02 15:31 JSON says 512 MiB, while a 16:08 note says 16 GiB.
+   15.4 GB dedicated allocation. Both BIOS settings were used (0.5 GB and
+   16 GB), but the two archived `llama-bench` files do not record which one they
+   ran under, and the settings differ in both capacity and host RAM.
 3. **Runtime.** The ROCm runtime and container image are not available now; the
    exact runtime version is unresolved (Dockerfile says ROCm 10.0; notes mention
    7.2.3/7.15).
-4. **Protocol.** The original CLI, batch size, clocks, power limit, and
+4. **Capacity, not just speed.** At the 16 GB carve-out ROCm cannot load this
+   model at all; at 0.5 GB it can, via unified memory. A comparison that crosses
+   settings is comparing two different feasible configurations, not two
+   backends on equal footing.
+5. **Protocol.** The original CLI, batch size, clocks, power limit, and
    temperature control were not recorded.
 
 A separate ROCm server baseline reached **18.17 t/s**, so 10.89 is a lower

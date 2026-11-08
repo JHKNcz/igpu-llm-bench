@@ -50,6 +50,12 @@ def load_stats() -> dict:
     return json.loads((ROOT / "data/processed/speculative-stats.json").read_text())
 
 
+def load_carveouts() -> dict:
+    return json.loads(
+        (ROOT / "data/raw/historical/carveout-states-2026-10-02.json").read_text()
+    )
+
+
 def main() -> int:
     bench = load_bench()
     roof = load_roofline()
@@ -97,6 +103,31 @@ def main() -> int:
             ("RESULTS.md", f"{fmt2(lo)}–{fmt2(hi)}", f"{mode} 95% CI of paired speedup")
         )
 
+    failures = 0
+
+    # --- carve-out arithmetic must be internally consistent ------------------
+    carve = load_carveouts()["settings"]
+    small, large = carve["small"], carve["large"]
+    for name, setting in (("small", small), ("large", large)):
+        total = setting["bios_reserved_vram_mib"] + setting["gtt_mib"]
+        if total != setting["gpu_addressable_total_mib"]:
+            print(
+                f"FAIL carve-out {name}: {setting['bios_reserved_vram_mib']} + "
+                f"{setting['gtt_mib']} != {setting['gpu_addressable_total_mib']}"
+            )
+            failures += 1
+    # The 35B weight buffer must exceed the 16 GB pool for the documented
+    # ROCm failure to be the right explanation.
+    if not 16679 > large["rocm_reported_vram_mib"]:
+        print("FAIL: 16 GB pool would fit the 16,679 MiB weight buffer")
+        failures += 1
+
+    checks.append(("RESULTS.md", "16,679.34", "ROCm weight buffer at 16 GB"))
+    checks.append(("RESULTS.md", "24,022", "GPU-addressable total at 16 GB"))
+    checks.append(("docs/hardware.md", "15,277", "host RAM at 16 GB"))
+    checks.append(("docs/hardware.md", "30,877", "host RAM at 0.5 GB"))
+    checks.append(("README.md", "16,679.34", "carve-out finding in the README"))
+
     # --- stale values that a correction must remove -------------------------
     stale = [
         ("59.3", "old roofline bandwidth before the hybrid-layer correction"),
@@ -111,7 +142,6 @@ def main() -> int:
             if needle in doc:
                 checks.append((name, f"ABSENT:{needle}", why))
 
-    failures = 0
     for filename, needle, why in checks:
         doc = readme if filename == "README.md" else results
         if needle.startswith("ABSENT:"):

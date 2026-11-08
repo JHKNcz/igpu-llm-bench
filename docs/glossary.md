@@ -55,9 +55,11 @@ can address system memory. The ROCm log's "15,438 MiB VRAM" matches the GTT
 total, not a dedicated carve-out.
 
 **VRAM carve-out** — the BIOS setting that reserves part of system RAM as
-dedicated GPU memory. This machine has been observed at both 512 MiB and 16 GiB
-depending on the boot; the records conflict, which is one reason the backend
-comparison is not controlled.
+dedicated GPU memory. Both 512 MiB and 16 GiB were used on this machine. The
+setting is a capacity trade-off: 16 GiB gives ~23.5 GiB of GPU-addressable
+memory but leaves only ~14.9 GiB for the host, while 512 MiB leaves ~30 GiB of
+host RAM. It decides which backend can load the model, not just how fast it
+runs.
 
 **gfx1150** — the AMD GPU architecture target for Strix Point (Ryzen AI 300
 series) integrated graphics. It determines which ROCm/HIP kernels are compiled.

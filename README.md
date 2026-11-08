@@ -31,6 +31,10 @@ ROCm    10.89 t/s   ───────────
   every prompt.
 - **Neither backend reaches the memory roofline.** Effective bandwidth plateaus
   near 40 GB/s, about a third of an assumed 120 GB/s peak.
+- **More VRAM is not strictly better.** At the 16 GB carve-out (24 GB
+  GPU-addressable) ROCm cannot load this model at all, while Vulkan can. At
+  0.5 GB ROCm loads it via unified memory into 30 GiB of host RAM. The carve-out
+  is a capacity trade-off, and it decides which backend can run the model.
 
 ## Key findings
 
@@ -50,8 +54,9 @@ Three things stop this from being a clean 2.3x:
 1. **Different builds.** The Vulkan binary reports commit `f872b5911`; the ROCm
    binary reports `unknown (0)`. Same source tree, not the same binary.
 2. **Different memory configuration.** The ROCm log's "15,438 MiB VRAM" is the
-   GTT/UMA aperture, not a dedicated carve-out. The carve-out records for the
-   same day disagree (512 MiB vs 16 GiB).
+   GTT/UMA aperture, not a dedicated carve-out. Both carve-out settings were
+   used on this machine (0.5 GB and 16 GB), and the per-run mapping is not
+   recorded in the benchmark files.
 3. **Non-monotonic ROCm series.** Throughput goes 10.89 → 12.63 → 7.84 t/s as
    depth grows. Depth 0 should not be the slowest point. A separate ROCm server
    baseline reached 18.17 t/s, so 10.89 is a lower bound.
@@ -77,7 +82,22 @@ The intervals are the result. MTP clears 1.00 comfortably; DFlash2 does not.
 The per-cell DFlash2 range is 0.94–1.69, which is consistent with "helps on some
 prompts, not others" rather than "a uniform 28% gain".
 
-### 3. The roofline says the bottleneck is not only bytes
+### 3. The carve-out decides what can run, not just how fast
+
+Both BIOS settings were used. Raising the carve-out from 0.5 GB to 16 GB buys
+24 GB of GPU-addressable memory at the cost of ~15.5 GiB of host RAM:
+
+| Setting | GPU-addressable | Host RAM | 35B full offload |
+|---|---:|---:|---|
+| 0.5 GB | 15.58 GiB | 30.15 GiB | ROCm works (unified memory) |
+| 16 GB | 23.46 GiB | 14.92 GiB | ROCm **fails**; Vulkan works |
+
+At 16 GB the target's 16,679.34 MiB weight buffer exceeds the 16,384 MiB pool,
+and 15,277 MiB of host RAM is too little to back the overflow. At 0.5 GB, HIP
+unified memory oversubscribes into 30 GiB and the model loads. Detail and the
+primary log: [`RESULTS.md` §1a](RESULTS.md), [`docs/hardware.md`](docs/hardware.md).
+
+### 4. The roofline says the bottleneck is not only bytes
 
 A first-order model — active weights plus attention KV per token — puts Vulkan
 at 39.5 GB/s effective at depth 0, and 40.6 GB/s at 64K, against an assumed
@@ -104,12 +124,12 @@ Five hypotheses, each with a test, are in
 | CPU | AMD Ryzen AI 9 HX 375, 12C/24T, 24 MiB L3 |
 | iGPU | Radeon 890M, `gfx1150`, RADV STRIX1, Mesa 26.0.8 |
 | Memory | 32 GB LPDDR5X (30 GiB visible); exact speed not recorded |
-| VRAM | 512 MiB dedicated + 15.08 GiB GTT current; 16 GiB note conflicts |
+| VRAM | Two settings: 0.5 GB (15.6 GiB addressable) and 16 GB (23.5 GiB addressable) |
 | Kernel | `7.0.0-42-generic` current; archived runs on `7.0.0-38-generic` |
 | NPU | `amdxdna` loaded, `/dev/accel/accel0` present; **unused** |
 | llama.cpp | `f872b591121761ac7b2af18283bd99bdc092a63a` |
 
-Full detail, including the carve-out conflict and the binary hashes:
+Full detail, including both carve-out settings and the binary hashes:
 [`docs/hardware.md`](docs/hardware.md).
 
 ## Reproduce it
@@ -154,7 +174,7 @@ Step-by-step, with the failure modes ordered by how often they bite:
 | `README.md` | This file: findings, hardware, reproduction |
 | `RESULTS.md` | Every table, one row per run, each with a source |
 | `docs/methodology.md` | Exact flags, repetitions, warmup, protocols |
-| `docs/hardware.md` | CPU, iGPU, RAM, VRAM, kernel, drivers, model architecture |
+| `docs/hardware.md` | CPU, iGPU, RAM, the two carve-out settings, model architecture |
 | `docs/limitations.md` | Confounds, missing data, what would close each gap |
 | `docs/glossary.md` | tg128, GTT, A3B, KV cache, draft acceptance, and the rest |
 | `docs/faq.md` | Troubleshooting and interpretation |

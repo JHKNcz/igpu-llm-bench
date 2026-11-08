@@ -29,10 +29,46 @@ Parsed rows: [`data/processed/llama-bench.csv`](data/processed/llama-bench.csv).
 ![Decode throughput by backend and context depth](docs/figures/backend-depth.svg)
 
 **Caveat:** this is not a controlled A/B. The builds differ, the per-run VRAM
-carve-out is not consistently recorded, and ROCm’s own depth series is
+carve-out is not recorded for either file, and ROCm’s own depth series is
 non-monotonic (10.89 at depth 0, 12.63 at 16K). A separate ROCm server baseline
 reached 18.17 t/s, so 10.89 is a lower bound. The defensible range is
 **1.4x–2.3x**; see [`docs/limitations.md`](docs/limitations.md).
+
+### 1a. Carve-out capacity, and a backend capability difference
+
+Both BIOS VRAM settings were used on this machine. They are not a quality
+setting; they move memory between the GPU pool and the host.
+
+| Setting | GPU pool | GTT | Host-visible RAM | GPU-addressable total | 35B full offload |
+|---|---:|---:|---:|---:|---|
+| 0.5 GB | 512 MiB | 15,438 MiB | 30,877 MiB | 15,950 MiB (15.58 GiB) | ROCm works (unified memory) |
+| 16 GB | 16,384 MiB | 7,638 MiB | 15,277 MiB | 24,022 MiB (23.46 GiB) | ROCm **fails**; Vulkan works |
+
+The 24,022 MiB is the "24 GB usable" figure: 16 GiB reserved plus 7.46 GiB GTT,
+matching the Vulkan budget in
+[`docs/historical/2026-10-02-vulkan-post-reboot.md`](docs/historical/2026-10-02-vulkan-post-reboot.md).
+
+**At 16 GB, ROCm cannot fully offload this model.** The weight buffer is
+16,679.34 MiB against a 16,384 MiB pool, and host RAM is only 15,277 MiB:
+
+```text
+ROCm0 : AMD Radeon 890M Graphics (16384 MiB, 16210 MiB free)
+CPU   : AMD Ryzen AI 9 HX 375 w/ Radeon 890M (15277 MiB, 15277 MiB free)
+E allocating 16679.34 MiB on device 0: cudaMalloc failed: out of memory
+E alloc_tensor_range: failed to allocate ROCm0 buffer of size 17489553920
+```
+
+At 0.5 GB the same model loads, because HIP unified memory can oversubscribe
+into 30 GiB of host RAM. So the *smaller* carve-out is the one that works for
+ROCm, and the larger one is the one that works for Vulkan.
+
+Source: [`data/raw/historical/rocm-16gb-load-failure-2026-10-02.log`](data/raw/historical/rocm-16gb-load-failure-2026-10-02.log)
+lines 6–7 and 159–161, and
+[`data/raw/historical/carveout-states-2026-10-02.json`](data/raw/historical/carveout-states-2026-10-02.json).
+
+> The allocation failing as one contiguous buffer is observed. The reason it
+> cannot span VRAM and GTT is a hypothesis; see
+> [`docs/hardware.md`](docs/hardware.md).
 
 ## 2. ROCm and Vulkan server session, 2026-10-02
 
