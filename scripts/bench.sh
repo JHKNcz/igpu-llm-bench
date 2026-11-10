@@ -20,6 +20,8 @@ Options:
   --depths LIST           comma-separated depths (default: 0,16384,65536)
   --reps N                measured repetitions per depth (default: 2)
   --ngl N                 GPU layers (default: 999)
+  --pp N                  prompt tokens for the pp test (default: 0, decode only)
+  --kv f16|q8_0           KV cache type for K and V (default: f16)
   --threads N             CPU threads (default: 12)
   --batch N               batch size (default: 2048)
   --ubatch N              micro-batch size (default: 512)
@@ -41,6 +43,8 @@ BACKEND="${BACKEND:-vulkan}"
 DEPTHS="${DEPTHS:-0,16384,65536}"
 REPS="${REPS:-2}"
 NGLOBAL="${NGLOBAL:-999}"
+PP="${PP:-0}"
+KV="${KV:-f16}"
 THREADS="${THREADS:-12}"
 BATCH="${BATCH:-2048}"
 UBATCH="${UBATCH:-512}"
@@ -56,6 +60,8 @@ while (($# > 0)); do
     --depths) DEPTHS="$2"; shift 2 ;;
     --reps) REPS="$2"; shift 2 ;;
     --ngl) NGLOBAL="$2"; shift 2 ;;
+    --pp) PP="$2"; shift 2 ;;
+    --kv) KV="$2"; shift 2 ;;
     --threads) THREADS="$2"; shift 2 ;;
     --batch) BATCH="$2"; shift 2 ;;
     --ubatch) UBATCH="$2"; shift 2 ;;
@@ -74,6 +80,10 @@ done
 case "$BACKEND" in
   vulkan|rocm) ;;
   *) echo "error: --backend must be vulkan or rocm" >&2; exit 2 ;;
+esac
+case "$KV" in
+  f16|q8_0|q4_0) ;;
+  *) echo "error: --kv must be f16, q8_0, or q4_0" >&2; exit 2 ;;
 esac
 
 if [[ "$BACKEND" == "rocm" && -n "${ROCM_PATH:-}" ]]; then
@@ -94,6 +104,8 @@ OUT="$BASE.txt"
   echo "llama_bench: $LLAMA_BENCH"
   echo "llama_bench_sha256: $(sha256sum "$LLAMA_BENCH" | awk '{print $1}')"
   echo "ngl: $NGLOBAL"
+  echo "pp: $PP"
+  echo "kv: $KV"
   echo "threads: $THREADS"
   echo "batch: $BATCH"
   echo "ubatch: $UBATCH"
@@ -122,7 +134,10 @@ echo "metadata: $META"
 : > "$OUT"
 for DEPTH in "${DEPTH_ARRAY[@]}"; do
   CMD=("$LLAMA_BENCH" -m "$MODEL" -ngl "$NGLOBAL" -fa on -t "$THREADS" \
-       -b "$BATCH" -ub "$UBATCH" -p 0 -n 128 -r "$REPS" -d "$DEPTH")
+       -b "$BATCH" -ub "$UBATCH" -p "$PP" -n 128 -r "$REPS" -d "$DEPTH")
+  if [[ "$KV" != "f16" ]]; then
+    CMD+=(-ctk "$KV" -ctv "$KV")
+  fi
   echo "command: ${CMD[*]}" | tee -a "$META"
   if ((DRY_RUN)); then
     continue

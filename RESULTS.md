@@ -8,6 +8,52 @@ reasoning. Do not compare rows across tables unless the conditions match.
 Every row has a source. The source file is in this repository; its original path
 and date are in [`data/provenance.md`](data/provenance.md).
 
+## 0. Controlled backend comparison at 0.5 GB (2026-11-10)
+
+This is the only comparison where Vulkan and ROCm ran under the same carve-out,
+the same flags, the same models, and the same depths. It supersedes the archived
+ratio as the primary evidence. Full discussion:
+[`docs/related/backend-comparison-512mb.md`](docs/related/backend-comparison-512mb.md).
+
+Carve-out: 512 MiB VRAM, 15,439 MiB GTT, 30,878 MiB host RAM. `tg128`,
+threads 12, `-ngl 999 -fa on -b 2048 -ub 512 -p 512 -n 128`. Ratio is
+Vulkan / ROCm.
+
+| Model | Size | KV | Depth | Vulkan | ROCm | V/ROCm | Winner | Source |
+|---|---|---:|---:|---:|---:|---:|---|---|
+| LFM2.5-8B-A1B | 4.05 GiB | F16 | 0 | 43.88 | 30.97 | 1.42x | Vulkan | `campaign-vulkan-20261110-kv-recheck.csv` |
+| LFM2.5-8B-A1B | 4.05 GiB | F16 | 16,384 | 30.32 | 22.38 | 1.35x | Vulkan | same |
+| LFM2.5-8B-A1B | 4.05 GiB | F16 | 65,536 | 20.63 | 16.19 | 1.27x | Vulkan | `campaign-vulkan-20261110.csv` (noisy) |
+| LFM2.5-8B-A1B | 4.05 GiB | Q8_0 | 0 | 39.74 | 25.57 | 1.55x | Vulkan | `campaign-vulkan-20261110-kv-recheck.csv` |
+| LFM2.5-8B-A1B | 4.05 GiB | Q8_0 | 16,384 | 28.98 | 20.09 | 1.44x | Vulkan | same |
+| LFM2.5-8B-A1B | 4.05 GiB | Q8_0 | 65,536 | 19.87 | 8.24 | 2.41x | Vulkan | `campaign-vulkan-20261110.csv` (noisy) |
+| LFM2.5-8B-A1B | 8.69 GiB | F16 | 0 | 35.12 | 25.66 | 1.37x | Vulkan | `campaign-vulkan-20261110.csv` |
+| LFM2.5-8B-A1B | 8.69 GiB | F16 | 16,384 | 18.27 | 22.55 | 0.81x | **ROCm** | same |
+| LFM2.5-8B-A1B | 8.69 GiB | F16 | 65,536 | 9.74 | 19.72 | 0.49x | **ROCm** | same |
+| Qwen3-VL-4B-Instruct | 4.70 GiB | F16 | 0 | 11.74 | 10.34 | 1.14x | Vulkan | same |
+| Qwen3-VL-4B-Instruct | 4.70 GiB | F16 | 16,384 | 5.46 | 6.40 | 0.85x | **ROCm** | same |
+| Qwen3.6-35B-A3B-MTP | 17.25 GiB | F16 | 0 | — | 17.66 | — | ROCm only | `campaign-rocm-20261110.csv` |
+| Qwen3.6-35B-A3B-MTP | 17.25 GiB | F16 | 16,384 | — | 14.54 | — | ROCm only | same |
+
+Parsed join: [`data/processed/backend-comparison-512mb.csv`](data/processed/backend-comparison-512mb.csv).
+
+**What is robust:** Vulkan is faster on the 4.05 GiB model at every depth
+(1.27x–1.42x on clean rows). For the 8.69 GiB model the ranking reverses:
+Vulkan 1.37x at depth 0, ROCm 1.23x at 16K and 2.03x at 64K. The dense 4B model
+also crosses over between 0 and 16K.
+
+**What is not:** the two Vulkan 64K rows flagged noisy, and the cause of the
+crossover. Three hypotheses (memory pressure, long-context kernels, thermal
+drift) are listed in the comparison document; none is tested.
+
+### 0a. The 35B at 0.5 GB
+
+ROCm loads it via HIP unified memory into 30 GiB of host RAM and decodes at
+17.66 t/s (depth 0) and 14.54 t/s (16K). GPU activity was verified by sampling
+`gpu_busy_percent` (46–65% during the run), so this is GPU work, not a CPU
+fallback. Vulkan cannot load the model at this setting: its total budget is
+~14.5 GiB against a 17.25 GiB model.
+
 ## 1. Archived llama-bench: Vulkan vs ROCm
 
 Model: `Qwen3.6-35B-A3B-UD-IQ4_NL.gguf`, 16.79 GiB, 34.66 B parameters,

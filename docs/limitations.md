@@ -18,9 +18,11 @@ least four ways:
    15.4 GB dedicated allocation. Both BIOS settings were used (0.5 GB and
    16 GB), but the two archived `llama-bench` files do not record which one they
    ran under, and the settings differ in both capacity and host RAM.
-3. **Runtime.** The ROCm runtime and container image are not available now; the
-   exact runtime version is unresolved (Dockerfile says ROCm 10.0; notes mention
-   7.2.3/7.15).
+3. **Runtime.** The measured runtime is ROCm/HIP 7.15, identified by an exact
+   image-ID match against the archived container (`docs/hardware.md`). It is not
+   ROCm 10: the Dockerfile's ROCm 10.0 package is a build target, and no 10.x
+   measurement exists. The host has no ROCm installed, but the archived image is
+   still present locally, so a same-image re-run is possible.
 4. **Capacity, not just speed.** At the 16 GB carve-out ROCm cannot load this
    model at all; at 0.5 GB it can, via unified memory. A comparison that crosses
    settings is comparing two different feasible configurations, not two

@@ -2,6 +2,29 @@
 
 All notable changes to this repository. Dates are UTC unless stated.
 
+## 2026-11-10 — Controlled backend comparison
+
+New measurements, no carve-out change (512 MiB throughout).
+
+- **New primary result.** Ran Vulkan and ROCm under the same carve-out, flags,
+  models, and depths. On a 4 GiB MoE model Vulkan is 1.27x–1.42x faster at every
+  depth. On an 8.7 GiB model of the same architecture the ranking reverses:
+  Vulkan 1.37x at depth 0, ROCm 1.23x at 16K and 2.03x at 64K.
+- **The 35B runs on ROCm at 512 MiB** (17.66 t/s at depth 0, 14.54 at 16K) via
+  unified memory; GPU activity verified with `gpu_busy_percent`. Vulkan cannot
+  load it: budget ~14.5 GiB vs 17.25 GiB model.
+- **Roofline finding.** IQ4 moves half the bytes of Q8 for the same model but is
+  only ~20% faster, so effective bandwidth halves (22.5 vs 38.7 GB/s). The IQ4
+  path is dequantization-bound, not bandwidth-bound.
+- **Archived 2.32x demoted** to a cross-setting observation, because no single
+  carve-out lets both backends fully offload the 35B.
+- Added `campaign.py`, `capacity_probe.py`, `compare_backends.py`,
+  `roofline_campaign.py`, `campaign_summary.py`, `reparse_campaign.py`, a
+  crossover figure, and a CPU-fallback guard (HIP silently ran on CPU when
+  `/dev/kfd` was missing).
+- Recorded that the measured ROCm is **HIP 7.15**, proven by image-ID match,
+  not ROCm 10.
+
 ## 2026-11-08 — Carve-out correction
 
 Analysis of existing logs; no new measurements.

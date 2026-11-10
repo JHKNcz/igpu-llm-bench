@@ -40,7 +40,8 @@
       "bytes": 18536192288,
       "sha256": null,
       "present": true,
-      "notes": "MTP-capable target used by the 2026-10-18 speculative comparison. SHA256 was not recorded."
+      "notes": "MTP-capable target used by the 2026-10-18 speculative comparison. SHA256 was not recorded.",
+      "active_params_b": 3.0
     },
     "lfm_iq4_nl": {
       "role": "small_target",
@@ -50,17 +51,30 @@
       "bytes": 4358844000,
       "sha256": null,
       "present": true,
-      "notes": "Present on the source machine; useful for a short harness smoke test."
+      "notes": "Present on the source machine; useful for a short harness smoke test.",
+      "active_params_b": 1.0
     },
     "lfm_q8_k_xl": {
       "role": "small_target",
       "file": "<models>/LFM2.5-8B-A1B/LFM2.5-8B-A1B-UD-Q8_K_XL.gguf",
       "quant": "UD-Q8_K_XL",
-      "size_gib": 8.70,
+      "size_gib": 8.7,
       "bytes": 9340497504,
       "sha256": null,
       "present": true,
-      "notes": "Present on the source machine."
+      "notes": "Present on the source machine.",
+      "active_params_b": 1.0
+    },
+    "qwen3vl_4b_q8": {
+      "role": "dense_control",
+      "file": "<models>/Qwen3-VL-4B-Instruct-UD-Q8_K_XL.gguf",
+      "quant": "UD-Q8_K_XL",
+      "size_gib": 4.71,
+      "bytes": 5056701216,
+      "sha256": null,
+      "present": true,
+      "active_params_b": 4.0,
+      "notes": "Dense 4B vision-language model, used as a non-MoE control for the roofline. Text-only decode."
     }
   },
   "binaries": {
@@ -87,7 +101,57 @@
     "kv_cache_mib_at_16k": 320,
     "ssm_state_mib": 1067.81,
     "peak_gbps": 120.0,
-    "peak_gbps_sensitivity": [102.4, 128.0],
-    "notes": "Active parameter count is the vendor 'A3B' label, not an independently measured activation count. The model is hybrid: 10 full-attention layers (full_attention_interval=4) use F16 K/V with 2 KV heads and head_dim 256, giving 2 * 2 * 256 * 2 * 10 = 20,480 bytes/token. The 30 SSM/recurrent layers use a 1,067.81 MiB state; its per-token traffic is not modeled. Peak assumes LPDDR5X-7500, 128-bit; exact RAM speed was not recorded."
+    "peak_gbps_sensitivity": [
+      102.4,
+      128.0
+    ],
+    "notes": "Active parameter count is the vendor 'A3B' label, not an independently measured activation count. The model is hybrid: 10 full-attention layers (full_attention_interval=4) use F16 K/V with 2 KV heads and head_dim 256, giving 2 * 2 * 256 * 2 * 10 = 20,480 bytes/token. The 30 SSM/recurrent layers use a 1,067.81 MiB state; its per-token traffic is not modeled. Peak assumes LPDDR5X-7500, 128-bit; exact RAM speed was not recorded.",
+    "models": {
+      "target_qwen35": {
+        "total_params_b": 34.66,
+        "active_params_b": 3.0,
+        "size_gib": 16.79,
+        "attention_layers": 10,
+        "head_dim": 256,
+        "kv_heads": 2,
+        "layers_total": 40
+      },
+      "lfm_iq4_nl": {
+        "total_params_b": 8.47,
+        "active_params_b": 1.0,
+        "size_gib": 4.06,
+        "attention_layers": null,
+        "head_dim": null,
+        "kv_heads": null,
+        "layers_total": null
+      },
+      "lfm_q8_k_xl": {
+        "total_params_b": 8.47,
+        "active_params_b": 1.0,
+        "size_gib": 8.7,
+        "attention_layers": null,
+        "head_dim": null,
+        "kv_heads": null,
+        "layers_total": null
+      },
+      "qwen3vl_4b_q8": {
+        "total_params_b": 4.0,
+        "active_params_b": 4.0,
+        "size_gib": 4.71,
+        "attention_layers": null,
+        "head_dim": null,
+        "kv_heads": null,
+        "layers_total": null
+      },
+      "mtp_qwen35": {
+        "total_params_b": 34.66,
+        "active_params_b": 3.0,
+        "size_gib": 17.26,
+        "attention_layers": 10,
+        "head_dim": 256,
+        "kv_heads": 2,
+        "layers_total": 41
+      }
+    }
   }
 }

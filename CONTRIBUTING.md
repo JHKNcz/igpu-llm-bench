@@ -58,6 +58,30 @@ find . -type f -not -path './.git/*' -not -path './runs/*' \
 python3 scripts/secret_scan.py
 ```
 
+## Running a campaign
+
+`scripts/campaign.py` runs a matrix of model / KV-type / depth / thread
+configurations at whatever memory setting the machine currently has, samples
+temperature and power during each run, and writes one CSV row per measurement.
+It records the carve-out with every row, and it records load failures as rows
+rather than hiding them.
+
+```bash
+MODELS_DIR=$HOME/LLM/LLMs \
+LLAMA_BENCH=$HOME/llama.cpp/build-vulkan/bin/llama-bench \
+make campaign
+```
+
+`scripts/capacity_probe.py` answers the other question at a small carve-out:
+how many layers can be offloaded before the model stops loading.
+
+```bash
+make capacity LLAMA_BENCH=... MODEL=... LABEL=my-model
+```
+
+Both write to `runs/`, which is git-ignored. Promote a run into `data/` only
+after sanitising it and adding a provenance row.
+
 ## Style
 
 - **Numbers carry sources.** Every table row has a file, and ideally a line.

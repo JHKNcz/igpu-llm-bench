@@ -34,3 +34,27 @@ agent-qwen-dflash2-n3,coding_agent,2026-10-13T19:30:47Z,vulkan,f872b5911 (11310)
 agent-qwen-dflash2-n6,coding_agent,2026-10-13T19:30:47Z,vulkan,f872b5911 (11310),Qwen3.6-35B-A3B + DFlash2,wall_tps,33.55,t/s,3,data/processed/agent-bench-summary.csv
 coder-dflash6-off,coding_quality,2026-10-02T22:00:00Z,rocm,unknown (0),Qwen3.6-35B-A3B + DFlash2,acceptance_checks,24,checks,1,docs/related/coding-quality.md
 coder-baseline-off,coding_quality,2026-10-02T22:00:00Z,rocm,unknown (0),Qwen3.6-35B-A3B,acceptance_checks,22,checks,1,docs/related/coding-quality.md
+ab512-vulkan-lfm2.5-ud-iq4nl-f16-d0,backend_ab_512mb,2026-11-10T00:21Z,vulkan,f872b5911 (11310),LFM2.5-8B-A1B UD-IQ4_NL,tg128,43.88,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-lfm2.5-ud-iq4nl-f16-d0,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),LFM2.5-8B-A1B UD-IQ4_NL,tg128,30.97,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-vulkan-lfm2.5-ud-iq4nl-f16-d16384,backend_ab_512mb,2026-11-10T00:21Z,vulkan,f872b5911 (11310),LFM2.5-8B-A1B UD-IQ4_NL,tg128,30.32,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-lfm2.5-ud-iq4nl-f16-d16384,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),LFM2.5-8B-A1B UD-IQ4_NL,tg128,22.38,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-vulkan-lfm2.5-ud-iq4nl-f16-d65536,backend_ab_512mb,2026-11-10T00:21Z,vulkan,f872b5911 (11310),LFM2.5-8B-A1B UD-IQ4_NL,tg128,20.63,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-lfm2.5-ud-iq4nl-f16-d65536,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),LFM2.5-8B-A1B UD-IQ4_NL,tg128,16.19,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-vulkan-lfm2.5-ud-iq4nl-q8_0-d0,backend_ab_512mb,2026-11-10T00:21Z,vulkan,f872b5911 (11310),LFM2.5-8B-A1B UD-IQ4_NL,tg128,39.74,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-lfm2.5-ud-iq4nl-q8_0-d0,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),LFM2.5-8B-A1B UD-IQ4_NL,tg128,25.57,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-vulkan-lfm2.5-ud-iq4nl-q8_0-d16384,backend_ab_512mb,2026-11-10T00:21Z,vulkan,f872b5911 (11310),LFM2.5-8B-A1B UD-IQ4_NL,tg128,28.98,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-lfm2.5-ud-iq4nl-q8_0-d16384,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),LFM2.5-8B-A1B UD-IQ4_NL,tg128,20.09,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-vulkan-lfm2.5-ud-iq4nl-q8_0-d65536,backend_ab_512mb,2026-11-10T00:21Z,vulkan,f872b5911 (11310),LFM2.5-8B-A1B UD-IQ4_NL,tg128,19.87,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-lfm2.5-ud-iq4nl-q8_0-d65536,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),LFM2.5-8B-A1B UD-IQ4_NL,tg128,8.24,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-vulkan-lfm2.5-ud-q8kxl-f16-d0,backend_ab_512mb,2026-11-10T00:21Z,vulkan,f872b5911 (11310),LFM2.5-8B-A1B UD-Q8_K_XL,tg128,35.12,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-lfm2.5-ud-q8kxl-f16-d0,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),LFM2.5-8B-A1B UD-Q8_K_XL,tg128,25.66,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-vulkan-lfm2.5-ud-q8kxl-f16-d16384,backend_ab_512mb,2026-11-10T00:21Z,vulkan,f872b5911 (11310),LFM2.5-8B-A1B UD-Q8_K_XL,tg128,18.27,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-lfm2.5-ud-q8kxl-f16-d16384,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),LFM2.5-8B-A1B UD-Q8_K_XL,tg128,22.55,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-vulkan-lfm2.5-ud-q8kxl-f16-d65536,backend_ab_512mb,2026-11-10T00:21Z,vulkan,f872b5911 (11310),LFM2.5-8B-A1B UD-Q8_K_XL,tg128,9.74,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-lfm2.5-ud-q8kxl-f16-d65536,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),LFM2.5-8B-A1B UD-Q8_K_XL,tg128,19.72,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-vulkan-qwen3-ud-q8kxl-f16-d0,backend_ab_512mb,2026-11-10T00:21Z,vulkan,f872b5911 (11310),Qwen3-VL-4B-Instruct UD-Q8_K_XL,tg128,11.74,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-qwen3-ud-q8kxl-f16-d0,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),Qwen3-VL-4B-Instruct UD-Q8_K_XL,tg128,10.34,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-vulkan-qwen3-ud-q8kxl-f16-d16384,backend_ab_512mb,2026-11-10T00:21Z,vulkan,f872b5911 (11310),Qwen3-VL-4B-Instruct UD-Q8_K_XL,tg128,5.46,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-qwen3-ud-q8kxl-f16-d16384,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),Qwen3-VL-4B-Instruct UD-Q8_K_XL,tg128,6.4,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-qwen3.6-ud-iq4nl-f16-d0,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),Qwen3.6-35B-A3B-MTP UD-IQ4_NL,tg128,17.66,t/s,3,data/processed/backend-comparison-512mb.csv
+ab512-rocm-qwen3.6-ud-iq4nl-f16-d16384,backend_ab_512mb,2026-11-10T00:21Z,rocm,unknown (0),Qwen3.6-35B-A3B-MTP UD-IQ4_NL,tg128,14.54,t/s,3,data/processed/backend-comparison-512mb.csv

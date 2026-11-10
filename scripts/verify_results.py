@@ -50,6 +50,15 @@ def load_stats() -> dict:
     return json.loads((ROOT / "data/processed/speculative-stats.json").read_text())
 
 
+def load_comparison() -> dict[tuple, dict]:
+    path = ROOT / "data/processed/backend-comparison-512mb.csv"
+    with path.open(newline="") as handle:
+        return {
+            (r["model"], r["quant"], r["kv"], int(r["depth"])): r
+            for r in csv.DictReader(handle)
+        }
+
+
 def load_carveouts() -> dict:
     return json.loads(
         (ROOT / "data/raw/historical/carveout-states-2026-10-02.json").read_text()
@@ -104,6 +113,37 @@ def main() -> int:
         )
 
     failures = 0
+
+    # --- controlled backend comparison at 0.5 GB ----------------------------
+    comp = load_comparison()
+    headline = [
+        ("LFM2.5-8B-A1B", "UD-IQ4_NL", "f16", 0, "1.42x"),
+        ("LFM2.5-8B-A1B", "UD-Q8_K_XL", "f16", 0, "1.37x"),
+        ("LFM2.5-8B-A1B", "UD-Q8_K_XL", "f16", 16384, "0.81x"),
+        ("LFM2.5-8B-A1B", "UD-Q8_K_XL", "f16", 65536, "0.49x"),
+        ("Qwen3-VL-4B-Instruct", "UD-Q8_K_XL", "f16", 16384, "0.85x"),
+    ]
+    for model, quant, kv, depth, expected in headline:
+        row = comp.get((model, quant, kv, depth))
+        if not row or not row["vulkan_over_rocm"]:
+            print(f"FAIL comparison: {model} {quant} {kv} d{depth} missing")
+            failures += 1
+            continue
+        actual = fmt2(float(row["vulkan_over_rocm"])) + "x"
+        if actual != expected:
+            print(f"FAIL comparison: {model} {quant} {kv} d{depth} {actual} != {expected}")
+            failures += 1
+            continue
+        checks.append(("README.md", expected, f"{model} d{depth} ratio"))
+        checks.append(("RESULTS.md", expected, f"{model} d{depth} ratio"))
+
+    rocm_only = comp.get(("Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", "f16", 0))
+    if not rocm_only or rocm_only["vulkan_tps"] not in ("", None):
+        print("FAIL: 35B row should have no Vulkan measurement")
+        failures += 1
+    else:
+        checks.append(("README.md", "17.66", "35B ROCm throughput"))
+        checks.append(("RESULTS.md", "17.66", "35B ROCm throughput"))
 
     # --- carve-out arithmetic must be internally consistent ------------------
     carve = load_carveouts()["settings"]

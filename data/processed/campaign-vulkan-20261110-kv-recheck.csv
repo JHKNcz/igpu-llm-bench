@@ -1,0 +1,9 @@
+run_id,model,quant,kv,threads,reps,backend,ngl,fa,test,depth,tps,tps_sd,size_gib,params_b,status,noisy,error,carveout_mib,gtt_mib,host_mib,cpu_temp_c_max,gpu_temp_c_max,gpu_power_w_max,build
+lfm_iq4_nl-f16-t12-r5,LFM2.5-8B-A1B,UD-IQ4_NL,f16,12,5,Vulkan,999,1,pp512,0,974.34,29.42,4.05,8.47,ok,,,512,15439,30878,70.8,73.0,39.1,f872b5911 (11310)
+lfm_iq4_nl-f16-t12-r5,LFM2.5-8B-A1B,UD-IQ4_NL,f16,12,5,Vulkan,999,1,tg128,0,43.88,2.73,4.05,8.47,ok,,,512,15439,30878,70.8,73.0,39.1,f872b5911 (11310)
+lfm_iq4_nl-f16-t12-r5,LFM2.5-8B-A1B,UD-IQ4_NL,f16,12,5,Vulkan,999,1,pp512,16384,685.64,42.02,4.05,8.47,ok,,,512,15439,30878,86.2,90.0,47.6,f872b5911 (11310)
+lfm_iq4_nl-f16-t12-r5,LFM2.5-8B-A1B,UD-IQ4_NL,f16,12,5,Vulkan,999,1,tg128,16384,30.32,2.99,4.05,8.47,ok,,,512,15439,30878,86.2,90.0,47.6,f872b5911 (11310)
+lfm_iq4_nl-q8_0-t12-r5,LFM2.5-8B-A1B,UD-IQ4_NL,q8_0,12,5,Vulkan,999,1,pp512,0,1003.21,48.63,4.05,8.47,ok,,,512,15439,30878,87.5,88.0,42.9,f872b5911 (11310)
+lfm_iq4_nl-q8_0-t12-r5,LFM2.5-8B-A1B,UD-IQ4_NL,q8_0,12,5,Vulkan,999,1,tg128,0,44.17,7.14,4.05,8.47,ok,yes,,512,15439,30878,87.5,88.0,42.9,f872b5911 (11310)
+lfm_iq4_nl-q8_0-t12-r5,LFM2.5-8B-A1B,UD-IQ4_NL,q8_0,12,5,Vulkan,999,1,pp512,16384,928.35,15.55,4.05,8.47,ok,,,512,15439,30878,94.4,96.0,51.1,f872b5911 (11310)
+lfm_iq4_nl-q8_0-t12-r5,LFM2.5-8B-A1B,UD-IQ4_NL,q8_0,12,5,Vulkan,999,1,tg128,16384,38.02,10.73,4.05,8.47,ok,yes,,512,15439,30878,94.4,96.0,51.1,f872b5911 (11310)

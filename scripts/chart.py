@@ -241,12 +241,67 @@ def fig_speculative() -> str:
     return "\n".join(parts)
 
 
+def fig_crossover() -> str:
+    """Vulkan vs ROCm through depth for the model where the ranking flips."""
+    import csv as _csv
+
+    rows = list(_csv.DictReader(
+        (ROOT / "data/processed/backend-comparison-512mb.csv").open(newline="")
+    ))
+    series = {}
+    for row in rows:
+        if row["model"] != "LFM2.5-8B-A1B" or row["quant"] != "UD-Q8_K_XL" or row["kv"] != "f16":
+            continue
+        depth = int(row["depth"])
+        if row["vulkan_tps"]:
+            series.setdefault("Vulkan", []).append((depth, float(row["vulkan_tps"])))
+        if row["rocm_tps"]:
+            series.setdefault("ROCm", []).append((depth, float(row["rocm_tps"])))
+
+    parts = svg_open(
+        "Where the backend ranking flips",
+        "LFM2.5-8B-A1B UD-Q8_K_XL, 8.69 GiB, tg128 at the 512 MiB carve-out. Same flags, same machine.",
+    )
+    grid, ymap = y_axis(40, ticks=5, unit=" t/s")
+    parts += grid
+    depths = [0, 16384, 65536]
+    labels = {0: "0", 16384: "16K", 65536: "64K"}
+
+    for name, colour, dash in [("Vulkan", VULKAN, None), ("ROCm", ROCM, "6 4")]:
+        pts = sorted(series.get(name, []))
+        if not pts:
+            continue
+        coords = []
+        for i, (depth, value) in enumerate(pts):
+            x = PAD_L + (PLOT_W / (len(depths) - 1)) * depths.index(depth)
+            coords.append((x, ymap(value), value))
+        path = " ".join(f"{'M' if i == 0 else 'L'} {x:.1f} {y:.1f}" for i, (x, y, _) in enumerate(coords))
+        d = f' stroke-dasharray="{dash}"' if dash else ""
+        parts.append(f'<path d="{path}" fill="none" stroke="{colour}" stroke-width="2.5"{d}/>')
+        for x, y, value in coords:
+            parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4.5" fill="{colour}"/>')
+            parts.append(text(x, y - 12, f"{value:.1f}", size=10, anchor="middle", weight="600"))
+
+    for i, depth in enumerate(depths):
+        x = PAD_L + (PLOT_W / (len(depths) - 1)) * i
+        parts.append(text(x, PAD_T + PLOT_H + 20, labels[depth], size=11, anchor="middle"))
+    parts.append(text(PAD_L + PLOT_W / 2, H - 14, "context depth (tokens)", size=10, anchor="middle", fill=MUTED))
+
+    parts.append(line(PAD_L, PAD_T + PLOT_H, PAD_L + PLOT_W, PAD_T + PLOT_H, stroke=INK, width=1.5))
+    # annotate the crossing region
+    parts.append(text(PAD_L + PLOT_W * 0.52, PAD_T + 16, "crossover between 0 and 16K",
+                      size=10, fill=ACCENT, weight="600"))
+    parts.append("</svg>")
+    return "\n".join(parts)
+
+
 def main() -> int:
     FIGDIR.mkdir(parents=True, exist_ok=True)
     figures = {
         "backend-depth.svg": fig_backend_depth(),
         "roofline.svg": fig_roofline(),
         "speculative.svg": fig_speculative(),
+        "crossover.svg": fig_crossover(),
     }
     for name, content in figures.items():
         (FIGDIR / name).write_text(content + "\n")
