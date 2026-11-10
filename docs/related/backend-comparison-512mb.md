@@ -118,7 +118,9 @@ a dequantization cost rather than winning proportionally on traffic.
   `vk::DeviceLostError` after `Not enough memory for command submission`, while
   466 of 512 MiB of dedicated VRAM was held by the desktop session.
   `llama-bench --list-devices` reported 15,950 MiB total and 14,814 MiB free.
-  A headless session was **not** tested.
+  A headless session was **not** tested. A formal `-ngl` sweep (0, 8, 16, 22,
+  28, 34, 40) failed identically at every level, including CPU-only `-ngl 0`, so
+  the block is not about how many layers are offloaded.
 
 ## Order and thermal checks
 

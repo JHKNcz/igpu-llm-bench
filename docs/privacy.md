@@ -69,7 +69,7 @@ source machine.
 
 | Metric | Result |
 |---|---:|
-| Text files scanned | 86 |
+| Text files scanned | 87 |
 | Unallowlisted matches | **0** |
 | Allowlisted matches | 4 (llama.cpp relative timestamps) |
 | Files dropped before scanning | see table above |

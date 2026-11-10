@@ -40,6 +40,7 @@ the table says so.
 | `data/processed/ab-a-20261110.csv` | `runs/ab-a-20261110T011408Z/ab.csv` (generated) | 2026-11-10T01:14Z | Byte-for-byte copy | Randomised 3-backend replication at depths 0 and 16K |
 | `data/processed/ab-b-20261110.csv` | `runs/ab-b-20261110T012735Z/ab.csv` | 2026-11-10T01:27Z | Byte-for-byte copy | Depth trend at 0/4K/8K/12K/16K |
 | `data/processed/ab-cpu-20261110.csv` | `runs/ab-cpu-20261110T014430Z/ab.csv` | 2026-11-10T01:44Z | Byte-for-byte copy | CPU baselines for four models |
+| `data/processed/capacity-vulkan-35b-512mb-20261110.csv` | `runs/capacity-20261110T024052Z/capacity.csv` | 2026-11-10T02:40Z | Byte-for-byte copy | Vulkan `-ngl` sweep for the 35B at 512 MiB; all levels fail |
 | `data/processed/ab-quant-20261110.csv` | `runs/ab-quant-20261110T023054Z/ab.csv` | 2026-11-10T02:30Z | Byte-for-byte copy | Interleaved IQ4 vs Q8 at depth 0, three backends |
 | `data/processed/ab-stability-20261110.csv` | `runs/ab-stability-20261110T021757Z/ab.csv` | 2026-11-10T02:17Z | Byte-for-byte copy | Six repetitions at depth 0, Vulkan vs ROCm |
 | `data/processed/roofline-campaign-20261110.csv` | `campaign-vulkan-20261110.csv` + `config/models.json` | 2026-11-10 (computation) | Computed by `scripts/roofline_campaign.py` | Depth-0 effective bandwidth per model |

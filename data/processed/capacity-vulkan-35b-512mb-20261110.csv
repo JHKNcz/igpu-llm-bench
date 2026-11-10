@@ -1,0 +1,8 @@
+label,model,model_gib,carveout_mib,gtt_mib,started_utc,ngl,status,tg128_tps,error,vram_used_before_mib,gtt_used_before_mib,vram_used_after_mib,gtt_used_after_mib
+Qwen3.6-35B-A3B-MTP,<models>/Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf,17.26,512,15439,2026-11-10T02:40:52.347975+00:00,0,failed,,Not enough memory for command submission.,468,436,476,29
+Qwen3.6-35B-A3B-MTP,<models>/Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf,17.26,512,15439,2026-11-10T02:40:52.347975+00:00,8,failed,,Not enough memory for command submission.,476,29,283,52
+Qwen3.6-35B-A3B-MTP,<models>/Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf,17.26,512,15439,2026-11-10T02:40:52.347975+00:00,16,failed,,Not enough memory for command submission.,283,52,201,25
+Qwen3.6-35B-A3B-MTP,<models>/Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf,17.26,512,15439,2026-11-10T02:40:52.347975+00:00,22,failed,,Not enough memory for command submission.,201,25,165,14
+Qwen3.6-35B-A3B-MTP,<models>/Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf,17.26,512,15439,2026-11-10T02:40:52.347975+00:00,28,failed,,Not enough memory for command submission.,165,14,165,14
+Qwen3.6-35B-A3B-MTP,<models>/Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf,17.26,512,15439,2026-11-10T02:40:52.347975+00:00,34,failed,,Not enough memory for command submission.,165,14,165,14
+Qwen3.6-35B-A3B-MTP,<models>/Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf,17.26,512,15439,2026-11-10T02:40:52.347975+00:00,40,failed,,Not enough memory for command submission.,165,14,165,14

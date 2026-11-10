@@ -73,6 +73,10 @@ The CPU is fastest at short context for every model tested.
   `--list-devices` reported 15,950 MiB total and 14,814 MiB free. Headless was
   not tested.
 
+A formal `-ngl` sweep (0, 8, 16, 22, 28, 34, 40) failed identically at every
+level, including CPU-only `-ngl 0`, so the block is not weight offload. Source:
+`data/processed/capacity-vulkan-35b-512mb-20261110.csv`.
+
 ### 0e. Order and thermal checks
 
 `scripts/order_effects.py` on the randomised suite:

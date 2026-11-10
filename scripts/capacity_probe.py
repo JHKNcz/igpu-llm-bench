@@ -61,7 +61,7 @@ def main() -> int:
 
     base = {
         "label": args.label,
-        "model": str(model),
+        "model": f"<models>/{model.name}",
         "model_gib": round(model.stat().st_size / 2**30, 2),
         "carveout_mib": mem("vram_total"),
         "gtt_mib": mem("gtt_total"),
