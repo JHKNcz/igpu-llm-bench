@@ -13,51 +13,66 @@ it compares two different memory settings and cannot be reproduced at one.
 
 ## TL;DR
 
-- **Controlled A/B, same 512 MiB carve-out, same flags, same models.** On a
-  4 GiB MoE model Vulkan is faster at every depth (**1.27x–1.42x**). On an
-  8.7 GiB model of the same architecture, Vulkan is faster at depth 0 (1.37x)
-  but **ROCm is faster at 16K (1.23x) and 64K (2.03x)**.
-- **The 35B model only runs on ROCm at this setting.** Vulkan's addressable
-  budget is ~14.5 GiB; the model is 17.25 GiB. ROCm loads it through unified
-  memory and decodes at **17.66 t/s** (depth 0), 14.54 t/s at 16K. No Vulkan
-  number exists, and none can.
-- **The archived 2.32x is real but cross-setting.** Vulkan was measured at
-  16 GB, ROCm at 0.5 GB, because that is the only setting where each could run
-  the 35B. It is not a controlled effect size.
-- **IQ4 is dequantization-bound, not bandwidth-bound.** Halving the bytes per
-  token (IQ4 vs Q8, same model) buys only ~20% throughput, so effective
-  bandwidth *halves*: 22.5 GB/s vs 38.7 GB/s against an assumed 120 GB/s peak.
+- **The iGPU is not automatically faster than the CPU.** At short context the
+  CPU wins for every model tested, including the 35B: 36.5 vs 30.6 (ROCm) and
+  24.0 (Vulkan) t/s on the 8.69 GiB model.
+- **ROCm is the most consistent GPU backend.** It beats Vulkan at every depth
+  measured, by 1.28x at depth 0 and 1.60x at 16K, and wins in all three
+  randomised rounds at 16K.
+- **Vulkan is the most variable.** The same command gives 18.7–35.2 t/s at depth
+  0 across six repetitions. An earlier single-session value of 35.12 was the top
+  of that distribution, not the typical value; the "Vulkan wins at depth 0"
+  claim did not survive randomisation.
+- **The 35B is a capacity problem first.** At 512 MiB, ROCm loads it via unified
+  memory (17.66 t/s), the CPU runs it at 18.38 t/s, and Vulkan could not load it
+  with the desktop running.
+- **4-bit quantization is not free.** IQ4 moves half the bytes per token of Q8
+  for the same model but runs only ~20% faster, so effective bandwidth halves:
+  22.5 vs 38.7 GB/s against an assumed 120 GB/s peak.
 - **MTP is a clear win (1.51x); DFlash2 is marginal (1.28x, CI 1.00–1.56).**
 
-## 1. Controlled comparison at 0.5 GB
+## 1. Vulkan, ROCm and CPU at 0.5 GB
 
-Same carve-out, same CLI (`-ngl 999 -fa on -t 12 -b 2048 -ub 512 -p 512 -n 128`),
-same depths, one discarded warmup per model, nothing else running.
+Same carve-out, same flags, backends interleaved with **shuffled round order**.
 
-`tg128`. Ratio is Vulkan / ROCm: above 1 means Vulkan faster.
+8.69 GiB MoE model, `tg128`, medians across rounds:
 
-| Model | Size | Depth | Vulkan | ROCm | V/ROCm | Winner |
-|---|---|---:|---:|---:|---:|---|
-| LFM2.5-8B-A1B IQ4 | 4.05 GiB | 0 | 43.88 | 30.97 | 1.42x | Vulkan |
-| LFM2.5-8B-A1B IQ4 | 4.05 GiB | 16K | 30.32 | 22.38 | 1.35x | Vulkan |
-| LFM2.5-8B-A1B Q8 | 8.69 GiB | 0 | 35.12 | 25.66 | 1.37x | Vulkan |
-| LFM2.5-8B-A1B Q8 | 8.69 GiB | 16K | 18.27 | 22.55 | 0.81x | **ROCm** |
-| LFM2.5-8B-A1B Q8 | 8.69 GiB | 64K | 9.74 | 19.72 | 0.49x | **ROCm** |
-| Qwen3-VL-4B Q8 (dense) | 4.70 GiB | 0 | 11.74 | 10.34 | 1.14x | Vulkan |
-| Qwen3-VL-4B Q8 (dense) | 4.70 GiB | 16K | 5.46 | 6.40 | 0.85x | **ROCm** |
-| Qwen3.6-35B-A3B-MTP | 17.25 GiB | 0 | — | 17.66 | — | ROCm only |
-| Qwen3.6-35B-A3B-MTP | 17.25 GiB | 16K | — | 14.54 | — | ROCm only |
+| Depth | Vulkan | ROCm | CPU |
+|---:|---:|---:|---:|
+| 0 | 23.97 | 30.61 | **36.70** |
+| 4K | 18.28 | 24.45 | — |
+| 8K | 17.46 | 23.72 | — |
+| 12K | 15.70 | 22.56 | — |
+| 16K | 16.31 | **26.14** | 23.85 |
 
-Full table, including the Q8_0 KV rows and the noisy rows that were excluded:
+Depth 0, six repetitions, same command each time:
+
+| Backend | Median | Range | sd |
+|---|---:|---:|---:|
+| Vulkan | 23.97 | 18.66–35.19 | 5.99 |
+| ROCm | 30.61 | 26.93–34.55 | 3.13 |
+| CPU | 36.70 | 35.87–36.59 | 0.36 |
+
+The other models at depth 0:
+
+| Model | Size | CPU | Vulkan | ROCm |
+|---|---|---:|---:|---:|
+| LFM IQ4_NL | 4.05 GiB | **51.99** | 43.88 | 30.97 |
+| LFM Q8_K_XL | 8.69 GiB | **36.70** | 23.97 | 30.61 |
+| Qwen3-VL-4B Q8 (dense) | 4.70 GiB | **14.81** | 11.74 | 10.34 |
+| Qwen3.6-35B-A3B-MTP | 17.25 GiB | **18.38** | — | 17.66 |
+
+Full method, ranges, order checks and caveats:
 [`docs/related/backend-comparison-512mb.md`](docs/related/backend-comparison-512mb.md).
 
-![Vulkan and ROCm throughput through depth on the 8.69 GiB model](docs/figures/crossover.svg)
+![Vulkan, ROCm and CPU throughput through depth](docs/figures/backends-depth.svg)
 
-**The crossover is the finding.** Vulkan's throughput falls 72% from depth 0 to
-64K on the 8.69 GiB model; ROCm's falls 23%. Something about the larger model at
-long context favours ROCm's unified-memory path. Three hypotheses — memory
-pressure, long-context kernel behaviour, thermal drift — are listed in the doc.
-None is tested.
+**Why the CPU wins at short context:** decode streams the active weights once
+per token, and the CPU and iGPU read the same LPDDR5X through the same memory
+controller. The CPU has no driver or command-submission overhead. Prefill shows
+the opposite — 1,025 t/s on Vulkan vs 264 t/s on CPU for the same model — so the
+GPU is the right tool when the work is compute-dense. The numbers are measured;
+the mechanism is a hypothesis.
 
 ## 2. Why the archive says 2.3x
 
@@ -71,8 +86,10 @@ The archived pair is `tg128`, 16.79 GiB target, same machine:
 Raw ratio **2.32x**. It is not a controlled comparison, for a reason that is now
 measured rather than suspected:
 
-- At 512 MiB, Vulkan's total budget is ~14.5 GiB, below the 16.79 GiB model, so
-  the archived Vulkan run cannot have used that setting.
+- At 512 MiB, Vulkan reports 15,950 MiB total and 14,814 MiB free, below the
+  16.79 GiB model, so the archived Vulkan run cannot have used that setting.
+  (That is arithmetic about total addressable memory; it is separate from the
+  desktop-VRAM exhaustion that blocks the 17.25 GiB model today.)
 - At 16 GB, ROCm cannot allocate the model: the weight buffer is 16,679.34 MiB and
   the pool is 16,384 MiB.
 
@@ -82,28 +99,38 @@ capability-and-speed observation, not an effect size.
 
 ![Decode throughput by backend and context depth, archived runs](docs/figures/backend-depth.svg)
 
-## 3. The roofline: IQ4 is not bandwidth-bound
+## 3. The roofline: quantization costs more than bytes
 
 At depth 0 the KV cache is negligible, so per-token traffic is dominated by the
-active weights. Effective bandwidth = active-weight bytes × t/s.
+active weights. Same-session, interleaved, medians of four rounds:
 
-| Model | Active GB/token | t/s | Effective GB/s | % of 120 |
-|---|---:|---:|---:|---:|
-| LFM IQ4_NL | 0.513 | 43.88 | 22.5 | 18.8% |
-| LFM Q8_K_XL | 1.102 | 35.12 | 38.7 | 32.2% |
-| Qwen3-VL 4B dense Q8 | 5.021 | 11.74 | 59.0 | 49.1% |
-| Qwen3.6-35B MTP (ROCm) | 1.565 | 17.66 | 27.6 | 23.0% |
+| Backend | Quant | Active GB/token | t/s | Effective GB/s | % of 120 |
+|---|---|---:|---:|---:|---:|
+| Vulkan | IQ4_NL | 0.513 | 49.30 | 25.3 | 21.1% |
+| Vulkan | Q8_K_XL | 1.102 | 25.63 | 28.2 | 23.5% |
+| ROCm | IQ4_NL | 0.513 | 44.86 | 23.0 | 19.2% |
+| ROCm | Q8_K_XL | 1.102 | 28.93 | 31.9 | 26.6% |
+| CPU | IQ4_NL | 0.513 | 51.50 | 26.4 | 22.0% |
+| CPU | Q8_K_XL | 1.102 | 36.64 | 40.4 | 33.6% |
 
-The IQ4 model moves **half the bytes** of the Q8 model and runs only ~20%
-faster. If decode were bandwidth-bound, it should be about twice as fast. It
-isn't, so the IQ4 path is spending time somewhere else — most plausibly
-dequantization. That is hypothesis H1, now with a measurement behind it.
+The Q8 file carries **2.15x** the bytes per token of the IQ4 file. If decode
+were purely bandwidth-bound, IQ4 should be 2.15x faster. It is not:
 
-The dense 4B model reaches 49% of the assumed peak, the MoE Q8 model 32%. The
-gap between those two is consistent with expert-routing overhead (H2), but the
-two models differ in more than routing, so it is not isolated.
+| Backend | IQ4/Q8 throughput | vs 2.15x bytes |
+|---|---:|---:|
+| Vulkan | 1.92x | close to bandwidth-bound |
+| ROCm | 1.55x | more overhead |
+| CPU | 1.41x | most overhead |
 
-![Effective bandwidth against the assumed 120 GB/s peak](docs/figures/roofline.svg)
+Equivalently, Q8 achieves a **higher effective bandwidth than IQ4 on every
+backend** (for example 40.4 vs 26.4 GB/s on the CPU). The 4-bit path is not
+getting the full benefit of its smaller footprint; it is paying a dequantization
+cost. The penalty is smallest on Vulkan and largest on the CPU.
+
+None of the three reaches half of the assumed 120 GB/s peak. The best is the CPU
+on Q8 at 34%.
+
+![Effective bandwidth by backend and quantization](docs/figures/quant.svg)
 
 Full argument and the five hypotheses: [`analysis/roofline.md`](analysis/roofline.md).
 
@@ -135,7 +162,7 @@ from noise for every prompt, and the per-cell range is 0.94–1.69.
 | Kernel | `7.0.0-42-generic`; archived runs on `7.0.0-38-generic` |
 | NPU | `amdxdna` loaded, `/dev/accel/accel0` present; **unused** |
 | llama.cpp | `f872b591121761ac7b2af18283bd99bdc092a63a` |
-| ROCm | HIP 7.15.26333, image `518ced857e9b…` — **not ROCm 10** |
+| ROCm | **10.0.0** (image `518ced857e9b…`, HIP 7.15.26333) |
 
 Details, including the two carve-out settings and why ROCm cannot load the 35B
 at 16 GB: [`docs/hardware.md`](docs/hardware.md).
@@ -194,6 +221,10 @@ Step-by-step, with the failure modes ordered by frequency:
 | `scripts/campaign.py` | Matrix runner with sensors and CPU-fallback guard |
 | `scripts/capacity_probe.py` | How much of a model can be offloaded |
 | `scripts/compare_backends.py` | Join Vulkan and ROCm runs into a ratio table |
+| `scripts/ab_campaign.py` | Shuffled multi-backend suites (crossover, depth, CPU, quant) |
+| `scripts/order_effects.py` | Per-round ratios and order/thermal rank correlations |
+| `scripts/rocm-build.sh` | Build llama-bench with HIP inside a ROCm image |
+| `FINDINGS.md` | One page for a non-specialist reader |
 | `scripts/stats.py` | Paired ratios and bootstrap intervals |
 | `scripts/roofline.py`, `scripts/roofline_campaign.py` | Bandwidth models |
 | `scripts/chart.py` | Data → dependency-free SVG |
@@ -207,22 +238,22 @@ Step-by-step, with the failure modes ordered by frequency:
 - **Not a general backend ranking.** It ranks them at 512 MiB, on one iGPU, for
   these models. The crossover point may move on other hardware.
 - **Not an explanation.** The depth reversal is measured; its cause is not.
-- **Not a 35B comparison.** Only ROCm can run the 35B at this setting.
-- **Not ROCm 10.** The measured runtime is HIP 7.15.
+- **Not a Vulkan 35B result.** Only ROCm and the CPU ran the 35B at this setting.
+- **Not ROCm 10.1.** The measured runtime is ROCm 10.0.0.
 - **Not thermally controlled.** The GPU reached 87–96 °C; run order was fixed.
 - **Not boot-level replicated.** One session per configuration.
 
 ## Open questions
 
-1. **Randomise run order and repeat**, to separate the depth crossover from
-   thermal drift.
-2. **Find the crossover depth** precisely (between 0 and 16K for the 8.7 GiB
-   model).
-3. **Test the mechanism**: does Vulkan's throughput recover at 64K if the model
-   is smaller, or the KV is quantized?
+1. **Explain Vulkan's instability.** It spans 18.7–35.2 t/s at depth 0 on an
+   unchanged command. Memory placement between the 512 MiB pool and GTT is the
+   leading suspect and was not instrumented.
+2. **Test a headless session**, which might let Vulkan load the 35B.
+3. **Extend depth beyond 16K** for the 8.7 GiB model; the 64K point exists only
+   from the earlier fixed-order campaign.
 4. **A 35B comparison at one setting** — only possible with reduced offload on
    both backends at 16 GB, which changes the carve-out.
-5. **ROCm 10**, to see whether the newer stack changes the crossover.
+5. **ROCm 10.1**, to see whether the newer point release changes anything.
 
 ## Verifying the numbers
 

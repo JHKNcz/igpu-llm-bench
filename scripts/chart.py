@@ -241,56 +241,127 @@ def fig_speculative() -> str:
     return "\n".join(parts)
 
 
-def fig_crossover() -> str:
-    """Vulkan vs ROCm through depth for the model where the ranking flips."""
+def fig_backends_depth() -> str:
+    """Three backends through depth, medians with observed ranges."""
     import csv as _csv
+    import statistics as _st
 
     rows = list(_csv.DictReader(
-        (ROOT / "data/processed/backend-comparison-512mb.csv").open(newline="")
+        (ROOT / "data/processed/ab-b-20261110.csv").open(newline="")
     ))
-    series = {}
+    rows += list(_csv.DictReader(
+        (ROOT / "data/processed/ab-a-20261110.csv").open(newline="")
+    ))
+    grouped: dict[tuple[str, int], list[float]] = {}
     for row in rows:
-        if row["model"] != "LFM2.5-8B-A1B" or row["quant"] != "UD-Q8_K_XL" or row["kv"] != "f16":
+        if row.get("status") != "ok" or row.get("test") != "tg128":
             continue
-        depth = int(row["depth"])
-        if row["vulkan_tps"]:
-            series.setdefault("Vulkan", []).append((depth, float(row["vulkan_tps"])))
-        if row["rocm_tps"]:
-            series.setdefault("ROCm", []).append((depth, float(row["rocm_tps"])))
+        grouped.setdefault((row["backend"], int(row["depth"])), []).append(float(row["tps"]))
+
+    series = {}
+    for (backend, depth), values in grouped.items():
+        series.setdefault(backend, []).append(
+            (depth, _st.median(values), min(values), max(values))
+        )
 
     parts = svg_open(
-        "Where the backend ranking flips",
-        "LFM2.5-8B-A1B UD-Q8_K_XL, 8.69 GiB, tg128 at the 512 MiB carve-out. Same flags, same machine.",
+        "Three backends through context depth",
+        "LFM2.5-8B-A1B UD-Q8_K_XL, 8.69 GiB, tg128, 512 MiB carve-out. Shuffled rounds; medians with observed range.",
     )
     grid, ymap = y_axis(40, ticks=5, unit=" t/s")
     parts += grid
-    depths = [0, 16384, 65536]
-    labels = {0: "0", 16384: "16K", 65536: "64K"}
+    depths = [0, 4096, 8192, 12288, 16384]
+    labels = {0: "0", 4096: "4K", 8192: "8K", 12288: "12K", 16384: "16K"}
 
-    for name, colour, dash in [("Vulkan", VULKAN, None), ("ROCm", ROCM, "6 4")]:
+    styles = {
+        "vulkan": (VULKAN, None, "Vulkan"),
+        "rocm": (ROCM, "6 4", "ROCm"),
+        "cpu": ("#4a4a4a", "2 3", "CPU"),
+    }
+    for name, (colour, dash, label) in styles.items():
         pts = sorted(series.get(name, []))
         if not pts:
             continue
         coords = []
-        for i, (depth, value) in enumerate(pts):
+        for depth, med, lo, hi in pts:
+            if depth not in depths:
+                continue
             x = PAD_L + (PLOT_W / (len(depths) - 1)) * depths.index(depth)
-            coords.append((x, ymap(value), value))
-        path = " ".join(f"{'M' if i == 0 else 'L'} {x:.1f} {y:.1f}" for i, (x, y, _) in enumerate(coords))
+            coords.append((x, ymap(med), ymap(hi), ymap(lo), med))
+        path = " ".join(f"{'M' if i == 0 else 'L'} {x:.1f} {y:.1f}" for i, (x, y, _, _, _) in enumerate(coords))
         d = f' stroke-dasharray="{dash}"' if dash else ""
         parts.append(f'<path d="{path}" fill="none" stroke="{colour}" stroke-width="2.5"{d}/>')
-        for x, y, value in coords:
-            parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4.5" fill="{colour}"/>')
-            parts.append(text(x, y - 12, f"{value:.1f}", size=10, anchor="middle", weight="600"))
+        for x, y, yh, yl, med in coords:
+            parts.append(line(x, yh, x, yl, stroke=colour, width=1.2))
+            parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="{colour}"/>')
+        # label the last point
+        lx, ly, _, _, med = coords[-1]
+        parts.append(text(lx + 8, ly + 4, f"{label} {med:.1f}", size=10, fill=colour, weight="600"))
 
     for i, depth in enumerate(depths):
         x = PAD_L + (PLOT_W / (len(depths) - 1)) * i
         parts.append(text(x, PAD_T + PLOT_H + 20, labels[depth], size=11, anchor="middle"))
-    parts.append(text(PAD_L + PLOT_W / 2, H - 14, "context depth (tokens)", size=10, anchor="middle", fill=MUTED))
-
+    parts.append(text(PAD_L + PLOT_W / 2, H - 14, "context depth (tokens); whiskers are observed min–max",
+                      size=10, anchor="middle", fill=MUTED))
     parts.append(line(PAD_L, PAD_T + PLOT_H, PAD_L + PLOT_W, PAD_T + PLOT_H, stroke=INK, width=1.5))
-    # annotate the crossing region
-    parts.append(text(PAD_L + PLOT_W * 0.52, PAD_T + 16, "crossover between 0 and 16K",
-                      size=10, fill=ACCENT, weight="600"))
+    parts.append("</svg>")
+    return "\n".join(parts)
+
+
+def fig_quant() -> str:
+    """Effective bandwidth by backend and quantization, same session."""
+    import csv as _csv
+    import statistics as _st
+
+    rows = [
+        r for r in _csv.DictReader(
+            (ROOT / "data/processed/ab-quant-20261110.csv").open(newline="")
+        )
+        if r.get("status") == "ok" and r.get("test") == "tg128"
+    ]
+    active = {"UD-IQ4_NL": 0.513, "UD-Q8_K_XL": 1.102}
+    grouped: dict[tuple[str, str], list[float]] = {}
+    for row in rows:
+        grouped.setdefault((row["backend"], row["quant"]), []).append(float(row["tps"]))
+    values = {
+        key: _st.median(vals) * active[key[1]] for key, vals in grouped.items()
+    }
+
+    parts = svg_open(
+        "Effective bandwidth by backend and quantization",
+        "Depth 0, LFM2.5-8B-A1B, same interleaved session. Active-weight bytes x median t/s against an assumed 120 GB/s peak.",
+    )
+    grid, ymap = y_axis(45, ticks=5, unit=" GB/s")
+    parts += grid
+    backends = ["vulkan", "rocm", "cpu"]
+    labels = {"vulkan": "Vulkan", "rocm": "ROCm", "cpu": "CPU"}
+    group_w = PLOT_W / len(backends)
+    bar_w = group_w * 0.28
+    for i, backend in enumerate(backends):
+        cx = PAD_L + group_w * (i + 0.5)
+        for j, (quant, colour) in enumerate(
+            [("UD-IQ4_NL", "#7a5ea8"), ("UD-Q8_K_XL", "#2f6f8f")]
+        ):
+            value = values.get((backend, quant))
+            if value is None:
+                continue
+            x = cx + (j - 1) * bar_w + bar_w * 0.08
+            y = ymap(value)
+            parts.append(rect(x, y, bar_w * 0.84, PAD_T + PLOT_H - y, colour))
+            parts.append(text(x + bar_w * 0.42, y - 6, f"{value:.1f}", size=10,
+                              anchor="middle", weight="600"))
+        parts.append(text(cx, PAD_T + PLOT_H + 20, labels[backend], size=11, anchor="middle"))
+
+    peak_y = ymap(120)
+    parts.append(line(PAD_L, peak_y, PAD_L + PLOT_W, peak_y, stroke=MUTED, width=1.2, dash="6 4"))
+    parts.append(text(PAD_L + PLOT_W, peak_y - 8, "assumed peak 120 GB/s",
+                      size=10, anchor="end", fill=MUTED))
+    parts.append(line(PAD_L, PAD_T + PLOT_H, PAD_L + PLOT_W, PAD_T + PLOT_H, stroke=INK, width=1.5))
+    lx, ly = PAD_L, H - 14
+    parts.append(rect(lx, ly - 9, 10, 10, "#7a5ea8"))
+    parts.append(text(lx + 16, ly, "IQ4_NL", size=11))
+    parts.append(rect(lx + 100, ly - 9, 10, 10, "#2f6f8f"))
+    parts.append(text(lx + 116, ly, "Q8_K_XL", size=11))
     parts.append("</svg>")
     return "\n".join(parts)
 
@@ -301,7 +372,8 @@ def main() -> int:
         "backend-depth.svg": fig_backend_depth(),
         "roofline.svg": fig_roofline(),
         "speculative.svg": fig_speculative(),
-        "crossover.svg": fig_crossover(),
+        "backends-depth.svg": fig_backends_depth(),
+        "quant.svg": fig_quant(),
     }
     for name, content in figures.items():
         (FIGDIR / name).write_text(content + "\n")

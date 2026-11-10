@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import csv
 import json
+import statistics
 import sys
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
@@ -50,13 +51,23 @@ def load_stats() -> dict:
     return json.loads((ROOT / "data/processed/speculative-stats.json").read_text())
 
 
-def load_comparison() -> dict[tuple, dict]:
-    path = ROOT / "data/processed/backend-comparison-512mb.csv"
-    with path.open(newline="") as handle:
-        return {
-            (r["model"], r["quant"], r["kv"], int(r["depth"])): r
-            for r in csv.DictReader(handle)
-        }
+def load_ab(names: list[str]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for name in names:
+        with (ROOT / "data/processed" / name).open(newline="") as handle:
+            rows += [r for r in csv.DictReader(handle) if r.get("status") == "ok"]
+    return rows
+
+
+def medians(rows: list[dict[str, str]], test: str = "tg128") -> dict[tuple, float]:
+    grouped: dict[tuple, list[float]] = {}
+    for row in rows:
+        if row.get("test") != test:
+            continue
+        grouped.setdefault(
+            (row["backend"].lower(), row["model"], row["quant"], int(row["depth"])), []
+        ).append(float(row["tps"]))
+    return {k: statistics.median(v) for k, v in grouped.items()}
 
 
 def load_carveouts() -> dict:
@@ -114,36 +125,64 @@ def main() -> int:
 
     failures = 0
 
-    # --- controlled backend comparison at 0.5 GB ----------------------------
-    comp = load_comparison()
-    headline = [
-        ("LFM2.5-8B-A1B", "UD-IQ4_NL", "f16", 0, "1.42x"),
-        ("LFM2.5-8B-A1B", "UD-Q8_K_XL", "f16", 0, "1.37x"),
-        ("LFM2.5-8B-A1B", "UD-Q8_K_XL", "f16", 16384, "0.81x"),
-        ("LFM2.5-8B-A1B", "UD-Q8_K_XL", "f16", 65536, "0.49x"),
-        ("Qwen3-VL-4B-Instruct", "UD-Q8_K_XL", "f16", 16384, "0.85x"),
-    ]
-    for model, quant, kv, depth, expected in headline:
-        row = comp.get((model, quant, kv, depth))
-        if not row or not row["vulkan_over_rocm"]:
-            print(f"FAIL comparison: {model} {quant} {kv} d{depth} missing")
-            failures += 1
-            continue
-        actual = fmt2(float(row["vulkan_over_rocm"])) + "x"
-        if actual != expected:
-            print(f"FAIL comparison: {model} {quant} {kv} d{depth} {actual} != {expected}")
-            failures += 1
-            continue
-        checks.append(("README.md", expected, f"{model} d{depth} ratio"))
-        checks.append(("RESULTS.md", expected, f"{model} d{depth} ratio"))
+    # --- randomised three-backend comparison at 0.5 GB ----------------------
+    # Each claim is checked against the suite it came from, not a pooled set.
+    def median_of(file_name: str, backend: str, model: str, quant: str,
+                  depth: int, test: str = "tg128") -> float | None:
+        rows = load_ab([file_name])
+        return medians(rows, test).get((backend, model, quant, depth))
 
-    rocm_only = comp.get(("Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", "f16", 0))
-    if not rocm_only or rocm_only["vulkan_tps"] not in ("", None):
-        print("FAIL: 35B row should have no Vulkan measurement")
-        failures += 1
-    else:
-        checks.append(("README.md", "17.66", "35B ROCm throughput"))
-        checks.append(("RESULTS.md", "17.66", "35B ROCm throughput"))
+    expectations = [
+        ("ab-stability-20261110.csv", "vulkan", "LFM2.5-8B-A1B", "UD-Q8_K_XL", 0, "23.97"),
+        ("ab-stability-20261110.csv", "rocm", "LFM2.5-8B-A1B", "UD-Q8_K_XL", 0, "30.61"),
+        ("ab-cpu-20261110.csv", "cpu", "LFM2.5-8B-A1B", "UD-Q8_K_XL", 0, "36.70"),
+        ("ab-a-20261110.csv", "vulkan", "LFM2.5-8B-A1B", "UD-Q8_K_XL", 16384, "16.31"),
+        ("ab-a-20261110.csv", "rocm", "LFM2.5-8B-A1B", "UD-Q8_K_XL", 16384, "26.14"),
+        ("ab-a-20261110.csv", "cpu", "LFM2.5-8B-A1B", "UD-Q8_K_XL", 16384, "23.85"),
+        ("ab-cpu-20261110.csv", "cpu", "LFM2.5-8B-A1B", "UD-IQ4_NL", 0, "51.99"),
+        ("ab-cpu-20261110.csv", "cpu", "Qwen3-VL-4B-Instruct", "UD-Q8_K_XL", 0, "14.81"),
+        ("ab-cpu-20261110.csv", "cpu", "Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", 0, "18.38"),
+        ("campaign-rocm-20261110.csv", "rocm", "Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", 0, "17.66"),
+    ]
+    for file_name, backend, model, quant, depth, expected in expectations:
+        actual = median_of(file_name, backend, model, quant, depth)
+        if actual is None or fmt2(actual) != expected:
+            print(f"FAIL ab: {backend} {model} {quant} d{depth} "
+                  f"{fmt2(actual) if actual is not None else 'missing'} != {expected}")
+            failures += 1
+            continue
+        checks.append(("README.md", expected, f"{backend} {model} d{depth} median"))
+        checks.append(("RESULTS.md", expected, f"{backend} {model} d{depth} median"))
+
+    # --- quantization at depth 0, same session ------------------------------
+    quant = medians(load_ab(["ab-quant-20261110.csv"]))
+    quant_expect = [
+        ("vulkan", "UD-IQ4_NL", "49.30"),
+        ("vulkan", "UD-Q8_K_XL", "25.63"),
+        ("rocm", "UD-IQ4_NL", "44.86"),
+        ("rocm", "UD-Q8_K_XL", "28.93"),
+        ("cpu", "UD-IQ4_NL", "51.50"),
+        ("cpu", "UD-Q8_K_XL", "36.64"),
+    ]
+    for backend, quant_name, expected in quant_expect:
+        actual = quant.get((backend, "LFM2.5-8B-A1B", quant_name, 0))
+        if actual is None or fmt2(actual) != expected:
+            print(f"FAIL quant: {backend} {quant_name} "
+                  f"{fmt2(actual) if actual is not None else 'missing'} != {expected}")
+            failures += 1
+            continue
+        checks.append(("RESULTS.md", expected, f"{backend} {quant_name} d0"))
+        checks.append(("README.md", expected, f"{backend} {quant_name} d0"))
+
+    # The 35B must have no Vulkan measurement in any suite.
+    for name in ("ab-a-20261110.csv", "ab-b-20261110.csv",
+                 "campaign-vulkan-20261110.csv", "campaign-vulkan-20261110-kv-recheck.csv"):
+        if any(
+            r["backend"] == "vulkan" and r["model"] == "Qwen3.6-35B-A3B-MTP"
+            for r in load_ab([name])
+        ):
+            print(f"FAIL: unexpected Vulkan 35B measurement in {name}")
+            failures += 1
 
     # --- carve-out arithmetic must be internally consistent ------------------
     carve = load_carveouts()["settings"]

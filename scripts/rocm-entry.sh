@@ -2,7 +2,7 @@
 # Entrypoint for running llama.cpp binaries inside the archived ROCm container.
 #
 # The archived measurements used the image
-#   rocm/dev-ubuntu-24.04:latest  (HIP 7.15.26333-0000000)
+#   rocm/dev-ubuntu-24.04:10.0.0-full  (ROCm 10.0.0, HIP 7.15.26333)
 # at the 0.5 GB carve-out, with HIP unified memory enabled so a model larger
 # than the GTT aperture can still load.
 #

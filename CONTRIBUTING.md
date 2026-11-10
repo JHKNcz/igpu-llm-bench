@@ -79,6 +79,20 @@ how many layers can be offloaded before the model stops loading.
 make capacity LLAMA_BENCH=... MODEL=... LABEL=my-model
 ```
 
+For questions about order and thermal drift, `scripts/ab_campaign.py` interleaves
+backends and shuffles every round. `scripts/order_effects.py` then checks whether
+a difference holds in every round and whether throughput correlates with run
+position rather than with the variable under test.
+
+```bash
+make ab SUITE=a VULKAN_BENCH=... ROCM_BENCH=... CPU_BENCH=... \
+  ROCM_IMAGE=... ROCM_MOUNT=... ROCM_MODEL_ROOT=... ROUNDS=3
+make order AB_CSV=runs/ab-a-*/ab.csv
+```
+
+A claim that reverses sign between rounds, or that correlates with position, is
+not a result.
+
 Both write to `runs/`, which is git-ignored. Promote a run into `data/` only
 after sanitising it and adding a provenance row.
 

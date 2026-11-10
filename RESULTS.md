@@ -8,51 +8,112 @@ reasoning. Do not compare rows across tables unless the conditions match.
 Every row has a source. The source file is in this repository; its original path
 and date are in [`data/provenance.md`](data/provenance.md).
 
-## 0. Controlled backend comparison at 0.5 GB (2026-11-10)
+## 0. Vulkan, ROCm and CPU at 0.5 GB (2026-11-10)
 
-This is the only comparison where Vulkan and ROCm ran under the same carve-out,
-the same flags, the same models, and the same depths. It supersedes the archived
-ratio as the primary evidence. Full discussion:
+The primary evidence. Backends interleaved with **shuffled round order**; same
+carve-out, same flags, same models. Full discussion:
 [`docs/related/backend-comparison-512mb.md`](docs/related/backend-comparison-512mb.md).
 
 Carve-out: 512 MiB VRAM, 15,439 MiB GTT, 30,878 MiB host RAM. `tg128`,
-threads 12, `-ngl 999 -fa on -b 2048 -ub 512 -p 512 -n 128`. Ratio is
-Vulkan / ROCm.
+threads 12, `-ngl 999 -fa on -b 2048 -ub 512 -p 512 -n 128` (CPU uses
+`-ngl 0` and a CPU-only build of the same commit).
 
-| Model | Size | KV | Depth | Vulkan | ROCm | V/ROCm | Winner | Source |
-|---|---|---:|---:|---:|---:|---:|---|---|
-| LFM2.5-8B-A1B | 4.05 GiB | F16 | 0 | 43.88 | 30.97 | 1.42x | Vulkan | `campaign-vulkan-20261110-kv-recheck.csv` |
-| LFM2.5-8B-A1B | 4.05 GiB | F16 | 16,384 | 30.32 | 22.38 | 1.35x | Vulkan | same |
-| LFM2.5-8B-A1B | 4.05 GiB | F16 | 65,536 | 20.63 | 16.19 | 1.27x | Vulkan | `campaign-vulkan-20261110.csv` (noisy) |
-| LFM2.5-8B-A1B | 4.05 GiB | Q8_0 | 0 | 39.74 | 25.57 | 1.55x | Vulkan | `campaign-vulkan-20261110-kv-recheck.csv` |
-| LFM2.5-8B-A1B | 4.05 GiB | Q8_0 | 16,384 | 28.98 | 20.09 | 1.44x | Vulkan | same |
-| LFM2.5-8B-A1B | 4.05 GiB | Q8_0 | 65,536 | 19.87 | 8.24 | 2.41x | Vulkan | `campaign-vulkan-20261110.csv` (noisy) |
-| LFM2.5-8B-A1B | 8.69 GiB | F16 | 0 | 35.12 | 25.66 | 1.37x | Vulkan | `campaign-vulkan-20261110.csv` |
-| LFM2.5-8B-A1B | 8.69 GiB | F16 | 16,384 | 18.27 | 22.55 | 0.81x | **ROCm** | same |
-| LFM2.5-8B-A1B | 8.69 GiB | F16 | 65,536 | 9.74 | 19.72 | 0.49x | **ROCm** | same |
-| Qwen3-VL-4B-Instruct | 4.70 GiB | F16 | 0 | 11.74 | 10.34 | 1.14x | Vulkan | same |
-| Qwen3-VL-4B-Instruct | 4.70 GiB | F16 | 16,384 | 5.46 | 6.40 | 0.85x | **ROCm** | same |
-| Qwen3.6-35B-A3B-MTP | 17.25 GiB | F16 | 0 | — | 17.66 | — | ROCm only | `campaign-rocm-20261110.csv` |
-| Qwen3.6-35B-A3B-MTP | 17.25 GiB | F16 | 16,384 | — | 14.54 | — | ROCm only | same |
+### 0a. Depth trend, 8.69 GiB MoE model
 
-Parsed join: [`data/processed/backend-comparison-512mb.csv`](data/processed/backend-comparison-512mb.csv).
+Medians across rounds:
 
-**What is robust:** Vulkan is faster on the 4.05 GiB model at every depth
-(1.27x–1.42x on clean rows). For the 8.69 GiB model the ranking reverses:
-Vulkan 1.37x at depth 0, ROCm 1.23x at 16K and 2.03x at 64K. The dense 4B model
-also crosses over between 0 and 16K.
+| Depth | Vulkan | ROCm | CPU | Source |
+|---:|---:|---:|---:|---|
+| 0 | 23.97 | 30.61 | **36.70** | `ab-stability-20261110.csv`, `ab-a-20261110.csv` |
+| 4,096 | 18.28 | 24.45 | — | `ab-b-20261110.csv` |
+| 8,192 | 17.46 | 23.72 | — | same |
+| 12,288 | 15.70 | 22.56 | — | same |
+| 16,384 | 16.31 | **26.14** | 23.85 | `ab-a-20261110.csv`, `ab-b-20261110.csv` |
 
-**What is not:** the two Vulkan 64K rows flagged noisy, and the cause of the
-crossover. Three hypotheses (memory pressure, long-context kernels, thermal
-drift) are listed in the comparison document; none is tested.
+Depth 0, six repetitions of the identical command:
 
-### 0a. The 35B at 0.5 GB
+| Backend | Median | Range | sd | n |
+|---|---:|---:|---:|---:|
+| Vulkan | 23.97 | 18.66–35.19 | 5.99 | 6 |
+| ROCm | 30.61 | 26.93–34.55 | 3.13 | 6 |
+| CPU | 36.70 | 35.87–36.59 | 0.36 | 3 |
 
-ROCm loads it via HIP unified memory into 30 GiB of host RAM and decodes at
-17.66 t/s (depth 0) and 14.54 t/s (16K). GPU activity was verified by sampling
-`gpu_busy_percent` (46–65% during the run), so this is GPU work, not a CPU
-fallback. Vulkan cannot load the model at this setting: its total budget is
-~14.5 GiB against a 17.25 GiB model.
+ROCm beats Vulkan at every depth (1.28x at depth 0, 1.60x at 16K) and wins in
+all three randomised rounds at 16K. Vulkan's depth-0 spread is the widest of the
+three.
+
+### 0b. Other models at depth 0
+
+| Model | Size | CPU | Vulkan | ROCm | Source |
+|---|---|---:|---:|---:|---|
+| LFM2.5-8B-A1B IQ4_NL | 4.05 GiB | **51.99** | 43.88 | 30.97 | `ab-cpu-20261110.csv`, `campaign-vulkan-20261110.csv`, `campaign-rocm-20261110.csv` |
+| LFM2.5-8B-A1B Q8_K_XL | 8.69 GiB | **36.70** | 23.97 | 30.61 | same |
+| Qwen3-VL-4B-Instruct Q8 | 4.70 GiB | **14.81** | 11.74 | 10.34 | same |
+| Qwen3.6-35B-A3B-MTP | 17.25 GiB | **18.38** | — | 17.66 | same |
+
+The CPU is fastest at short context for every model tested.
+
+### 0c. Depth 16,384
+
+| Model | CPU | Vulkan | ROCm |
+|---|---:|---:|---:|
+| LFM IQ4_NL | 29.57 | **30.32** | 22.38 |
+| LFM Q8_K_XL | 23.85 | 16.31 | **26.14** |
+| Qwen3-VL-4B Q8 | 4.94 | 5.46 | **6.40** |
+| Qwen3.6-35B-MTP | — | — | 14.54 |
+
+### 0d. The 35B at 0.5 GB
+
+- ROCm: 17.66 t/s at depth 0, 14.54 at 16K, via HIP unified memory. GPU activity
+  verified with `gpu_busy_percent` (46–65%).
+- CPU: 18.38 t/s at depth 0 — slightly faster than the GPU.
+- Vulkan: could not load it with the desktop running. At `-ngl 0` it failed with
+  `vk::DeviceLostError` after `radv/amdgpu: Not enough memory for command
+  submission`, while 466 of 512 MiB of dedicated VRAM was held by the desktop.
+  `--list-devices` reported 15,950 MiB total and 14,814 MiB free. Headless was
+  not tested.
+
+### 0e. Order and thermal checks
+
+`scripts/order_effects.py` on the randomised suite:
+
+- Vulkan/ROCm at 16K: 0.61x, 0.65x, 0.59x — same sign and similar magnitude in
+  all three rounds.
+- Rank correlation of throughput with position in the round: +0.03 at depth 0,
+  −0.28 at 16K. No evidence that run order drives the result.
+- Rank correlation with round number: +0.00 and +0.26. No strong thermal drift.
+
+### 0f. Data quality
+
+- An earlier fixed-order campaign recorded Vulkan at 35.12 t/s at depth 0. Six
+  randomised repetitions give 23.97 (18.66–35.19). The single value was an
+  upper-tail sample and is not used for any claim.
+- One ROCm 16K sample flagged noisy (26.14 ± 4.53); the other two were
+  24.02 ± 1.83 and 27.61 ± 2.60.
+- One Vulkan 8K sample hit 30.75 against a 16.4–17.5 cluster; medians are used
+  for the trend.
+- The ROCm arm initially ran without `/dev/kfd` and silently fell back to CPU.
+  That run was discarded, and both campaign scripts now refuse to record a run
+  when the log contains a CPU-fallback message.
+
+### 0g. Quantization at depth 0, same session
+
+Interleaved, four rounds, medians. Active-weight bytes are 0.513 GB/token for
+IQ4 and 1.102 GB/token for Q8, a 2.15x ratio.
+
+| Backend | Quant | t/s | Effective GB/s | % of 120 | IQ4/Q8 |
+|---|---|---:|---:|---:|---:|
+| Vulkan | IQ4_NL | 49.30 | 25.3 | 21.1% | 1.92x |
+| Vulkan | Q8_K_XL | 25.63 | 28.2 | 23.5% | |
+| ROCm | IQ4_NL | 44.86 | 23.0 | 19.2% | 1.55x |
+| ROCm | Q8_K_XL | 28.93 | 31.9 | 26.6% | |
+| CPU | IQ4_NL | 51.50 | 26.4 | 22.0% | 1.41x |
+| CPU | Q8_K_XL | 36.64 | 40.4 | 33.6% | |
+
+Source: `data/processed/ab-quant-20261110.csv`. If decode were purely
+bandwidth-bound, IQ4 would be 2.15x faster than Q8; it is 1.4x–1.9x faster, and
+Q8 reaches higher effective bandwidth on every backend. The 4-bit path pays a
+dequantization cost rather than winning proportionally on traffic.
 
 ## 1. Archived llama-bench: Vulkan vs ROCm
 

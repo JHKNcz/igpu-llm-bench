@@ -126,28 +126,28 @@ faster in every archived same-machine comparison, by roughly 1.4x–2.3x.
 | Working tree | Clean at inspection |
 | Vulkan build | build 11310, commit `f872b5911`, GNU 15.2.0 |
 | ROCm build | build 0 / unknown commit, GNU 13.3.0 |
-| ROCm runtime used for the measurements | **HIP 7.15.26333-0000000**, from `rocm/dev-ubuntu-24.04:latest` |
+| ROCm runtime used for the measurements | **ROCm 10.0.0**, image `rocm/dev-ubuntu-24.04:10.0.0-full` (HIP 7.15.26333-0000000) |
 | Archived container image ID | `518ced857e9bc4f27392985257dcdf19c43d28918ff6e60074ea09ceb9edd19d` |
 | Same image still local | Yes — the `:latest` image ID matches byte-for-byte |
-| Dockerfile target | Ubuntu 26.04, ROCm 10.0 `amdrocm-core-dev10.0-gfx1150` (**not** the measured runtime) |
+| Dockerfile target | Ubuntu 26.04, ROCm 10.0 `amdrocm-core-dev10.0-gfx1150` |
 | Host ROCm runtime | **absent** (`/opt/rocm` missing; `libhipblas.so.3` missing) |
 
 ### Which ROCm version the numbers came from
 
-The archived ROCm results are **ROCm/HIP 7.15, not ROCm 10**. Three independent
-records agree:
+The measured runtime is **ROCm 10.0.0**, not ROCm 7.x. Three records agree:
 
 1. `container-provenance.txt` records image
    `518ced857e9bc4f27392985257dcdf19c43d28918ff6e60074ea09ceb9edd19d`.
-2. The local `docker.io/rocm/dev-ubuntu-24.04:latest` image has that exact ID.
-3. That image reports `HIP version: 7.15.26333-0000000`, the same string the
-   2026-10-02 session note recorded from `hipconfig --version`.
+2. The local `docker.io/rocm/dev-ubuntu-24.04:10.0.0-full` image has that exact
+   ID, and so does `:latest` — they are the same image.
+3. That image reports `HIP version: 7.15.26333-0000000`, which is the HIP
+   version bundled inside ROCm 10.0.0. The 2026-10-02 session note recorded the
+   same HIP string from `hipconfig --version`.
 
-ROCm 10.0 appears in two places that are easy to confuse with a measurement: the
-Dockerfile installs `amdrocm-core-dev10.0-gfx1150`, and the older `build/` CMake
-cache points at `/opt/rocm/core-10.0/lib/llvm/bin/clang++`. The measured
-`build-rocm` binary was compiled with `/opt/rocm/lib/llvm/bin/clang++`, matching
-the 7.15 image. **No ROCm 10 measurement exists in this repository.**
+**The "7.15" in the logs is the HIP version, not the ROCm version.** An earlier
+revision of this document read it as "ROCm 7.15, not ROCm 10"; that was wrong.
+The tag mapping is the evidence: `10.0.0-full` and `latest` resolve to the same
+image ID, so every ROCm measurement here is ROCm 10.0.0.
 
 The archived `model-binary-sha256.txt` records:
 

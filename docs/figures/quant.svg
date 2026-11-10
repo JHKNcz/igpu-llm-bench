@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="380" viewBox="0 0 760 380" role="img" aria-labelledby="title desc">
+<title id="title">Effective bandwidth by backend and quantization</title>
+<desc id="desc">Depth 0, LFM2.5-8B-A1B, same interleaved session. Active-weight bytes x median t/s against an assumed 120 GB/s peak.</desc>
+<rect width="760" height="380" fill="#ffffff"/>
+<text x="64.0" y="26.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#1b1b1b" text-anchor="start" font-weight="600">Effective bandwidth by backend and quantization</text>
+<text x="64.0" y="44.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6b6b6b" text-anchor="start" font-weight="normal">Depth 0, LFM2.5-8B-A1B, same interleaved session. Active-weight bytes x median t/s against an assumed 120 GB/s peak.</text>
+<line x1="64.0" y1="324.0" x2="736.0" y2="324.0" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="328.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">0 GB/s</text>
+<line x1="64.0" y1="268.8" x2="736.0" y2="268.8" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="272.8" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">9 GB/s</text>
+<line x1="64.0" y1="213.6" x2="736.0" y2="213.6" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="217.6" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">18 GB/s</text>
+<line x1="64.0" y1="158.4" x2="736.0" y2="158.4" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="162.4" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">27 GB/s</text>
+<line x1="64.0" y1="103.2" x2="736.0" y2="103.2" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="107.2" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">36 GB/s</text>
+<line x1="64.0" y1="48.0" x2="736.0" y2="48.0" stroke="#e4e4e4" stroke-width="1"/>
+<text x="54.0" y="52.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">45 GB/s</text>
+<rect x="118.3" y="168.9" width="52.7" height="155.1" fill="#7a5ea8"/>
+<text x="144.6" y="162.9" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1b1b1b" text-anchor="middle" font-weight="600">25.3</text>
+<rect x="181.0" y="150.8" width="52.7" height="173.2" fill="#2f6f8f"/>
+<text x="207.4" y="144.8" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1b1b1b" text-anchor="middle" font-weight="600">28.2</text>
+<text x="176.0" y="344.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#1b1b1b" text-anchor="middle" font-weight="normal">Vulkan</text>
+<rect x="342.3" y="182.9" width="52.7" height="141.1" fill="#7a5ea8"/>
+<text x="368.6" y="176.9" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1b1b1b" text-anchor="middle" font-weight="600">23.0</text>
+<rect x="405.0" y="128.5" width="52.7" height="195.5" fill="#2f6f8f"/>
+<text x="431.4" y="122.5" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1b1b1b" text-anchor="middle" font-weight="600">31.9</text>
+<text x="400.0" y="344.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#1b1b1b" text-anchor="middle" font-weight="normal">ROCm</text>
+<rect x="566.3" y="161.9" width="52.7" height="162.1" fill="#7a5ea8"/>
+<text x="592.6" y="155.9" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1b1b1b" text-anchor="middle" font-weight="600">26.4</text>
+<rect x="629.0" y="76.4" width="52.7" height="247.6" fill="#2f6f8f"/>
+<text x="655.4" y="70.4" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1b1b1b" text-anchor="middle" font-weight="600">40.4</text>
+<text x="624.0" y="344.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#1b1b1b" text-anchor="middle" font-weight="normal">CPU</text>
+<line x1="64.0" y1="-412.0" x2="736.0" y2="-412.0" stroke="#6b6b6b" stroke-width="1.2" stroke-dasharray="6 4"/>
+<text x="736.0" y="-420.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6b6b6b" text-anchor="end" font-weight="normal">assumed peak 120 GB/s</text>
+<line x1="64.0" y1="324.0" x2="736.0" y2="324.0" stroke="#1b1b1b" stroke-width="1.5"/>
+<rect x="64.0" y="357.0" width="10.0" height="10.0" fill="#7a5ea8"/>
+<text x="80.0" y="366.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#1b1b1b" text-anchor="start" font-weight="normal">IQ4_NL</text>
+<rect x="164.0" y="357.0" width="10.0" height="10.0" fill="#2f6f8f"/>
+<text x="180.0" y="366.0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#1b1b1b" text-anchor="start" font-weight="normal">Q8_K_XL</text>
+</svg>

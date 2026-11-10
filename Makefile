@@ -1,5 +1,5 @@
 # Reproducible entry points. Run `make check` before committing.
-.PHONY: all data figures check scan campaign capacity compare clean
+.PHONY: all data figures check scan campaign capacity compare ab order clean
 
 PYTHON ?= python3
 
@@ -34,10 +34,23 @@ capacity:
 	$(PYTHON) scripts/capacity_probe.py --llama-bench "$(LLAMA_BENCH)" \
 		--model "$(MODEL)" --label "$(LABEL)"
 
+## Randomised multi-backend suites: a (crossover), b (location), cpu (baseline).
+## Requires VULKAN_BENCH, ROCM_BENCH, CPU_BENCH and the ROCm container mounts.
+ab:
+	$(PYTHON) scripts/ab_campaign.py --suite $(SUITE) \
+		--vulkan-bench "$(VULKAN_BENCH)" --rocm-bench "$(ROCM_BENCH)" \
+		--cpu-bench "$(CPU_BENCH)" \
+		--rocm-container "$(ROCM_IMAGE)" --rocm-mount "$(ROCM_MOUNT)" \
+		--rocm-model-root "$(ROCM_MODEL_ROOT)" --rounds $(ROUNDS)
+
+## Test whether a difference is order or thermal drift.
+order:
+	$(PYTHON) scripts/order_effects.py $(AB_CSV)
+
 ## Join a Vulkan and a ROCm campaign into a ratio table.
 compare:
 	$(PYTHON) scripts/compare_backends.py --vulkan $(VULKAN) --rocm $(ROCM) \
-		--out data/processed/backend-comparison-512mb.csv
+		--out $(OUT)
 
 ## Remove caches and local run output. Does not touch data/ or docs/.
 clean:

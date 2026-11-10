@@ -2,6 +2,27 @@
 
 All notable changes to this repository. Dates are UTC unless stated.
 
+## 2026-11-10 — Randomised replication, CPU baselines, corrections
+
+Three new suites, all at the unchanged 512 MiB carve-out.
+
+- **The earlier depth-0 conclusion did not replicate.** A fixed-order session had
+  Vulkan at 35.12 t/s; six randomised repetitions give a median of 23.97 and a
+  range of 18.66–35.19. The single value was an upper-tail sample.
+- **ROCm is the most consistent GPU backend.** It beats Vulkan at every depth
+  (1.28x at depth 0, 1.60x at 16K) and wins all three randomised rounds at 16K.
+- **The CPU is fastest at short context for every model tested**, including the
+  35B (18.38 vs 17.66 t/s on ROCm). Prefill is the opposite: 1,025 t/s on Vulkan
+  vs 264 on CPU.
+- **Quantization re-measured interleaved.** IQ4 carries 2.15x fewer bytes than Q8
+  but is only 1.41x–1.92x faster depending on backend; Q8 reaches higher
+  effective bandwidth everywhere. The 4-bit path pays a dequantization cost.
+- **Corrected the runtime identity again:** the measured runtime is **ROCm
+  10.0.0**. The `10.0.0-full` and `latest` tags resolve to the same image ID;
+  HIP 7.15.26333 is the HIP version inside ROCm 10.0.0, not a ROCm version.
+- Added `ab_campaign.py` (shuffled rounds, three backends), `order_effects.py`,
+  `ab_summary`-style tables, a CPU-only build recipe, and `FINDINGS.md`.
+
 ## 2026-11-10 — Controlled backend comparison
 
 New measurements, no carve-out change (512 MiB throughout).
@@ -22,8 +43,9 @@ New measurements, no carve-out change (512 MiB throughout).
   `roofline_campaign.py`, `campaign_summary.py`, `reparse_campaign.py`, a
   crossover figure, and a CPU-fallback guard (HIP silently ran on CPU when
   `/dev/kfd` was missing).
-- Recorded that the measured ROCm is **HIP 7.15**, proven by image-ID match,
-  not ROCm 10.
+- **Corrected** an earlier misreading: the measured runtime is **ROCm 10.0.0**,
+  not "HIP 7.15". The `10.0.0-full` and `latest` tags resolve to the same image
+  ID; 7.15 is the HIP version bundled inside ROCm 10.0.0.
 
 ## 2026-11-08 — Carve-out correction
 
