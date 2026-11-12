@@ -16,6 +16,7 @@ the table says so.
 | `data/raw/dflash-rocm-server-2026-10-01.log` | `~/LLM/dflash-rocm.log` | mtime 2026-10-01 16:09 +0200; log uses relative timestamps | `/LLM/LLMs/` → `<models>/`; `/LLM/llama.cpp-managed/` → `<llama.cpp>/`; bind address → `[IP_ADDRESS]` | Older DFlash (block 16) ROCm server run: 15.54 t/s, 18.091% acceptance; second request incomplete |
 | `data/raw/build-config-2026-10-02.txt` | `~/LLM/testing_resources/historical/2026-10-02-qwen/evidence/build-cache-excerpts.txt` | 2026-10-02 bundle | `/home/<user>/LLM/...` → `<llm-root>/...` | CMake caches for the ROCm and Vulkan builds |
 | `data/raw/historical/session-summary-2026-10-02.txt` | `.../runs/2026-10-02-qwen/summary.txt` | 2026-10-02 | Byte-for-byte copy | 56-run session index: status, wall t/s, unique outputs, acceptance |
+| `data/raw/hardware/uma-carveout-2026-11-12.txt` | `amd-smi static --mem-carveout`, `uma/carveout`, `uma/carveout_options`, sysfs memory, `free -m` | captured 2026-11-12T00:39Z | Byte-for-byte capture | The 16 GB carve-out state, the index table, and the control surface |
 | `data/raw/historical/model-binary-sha256-2026-10-02.txt` | `.../runs/2026-10-02-qwen/model-binary-sha256.txt` | 2026-10-02 | Paths → `<llm-root>/...`; hashes unchanged | Target, DFlash1/2, and server binary SHA256 values |
 | `data/raw/historical/post-reboot-memory-2026-10-02.json` | `.../runs/2026-10-02-qwen/post-reboot-memory.json` | recorded 2026-10-02T15:31:18+0200 | Byte-for-byte copy | 512 MiB VRAM / 15.08 GiB GTT record |
 | `data/raw/historical/vulkan-nmax6-runs-2026-10-02.json` | `.../runs/2026-10-02-qwen/selected-vulkan-config.json` | started 2026-10-02T16:14:00+0200 | Byte-for-byte copy | Per-run Vulkan DFlash2 nmax6: 37.98, 42.20, 43.14 t/s; 91–94 °C; 45–52 W |
@@ -41,6 +42,13 @@ the table says so.
 | `data/processed/ab-b-20261110.csv` | `runs/ab-b-20261110T012735Z/ab.csv` | 2026-11-10T01:27Z | Byte-for-byte copy | Depth trend at 0/4K/8K/12K/16K |
 | `data/processed/ab-cpu-20261110.csv` | `runs/ab-cpu-20261110T014430Z/ab.csv` | 2026-11-10T01:44Z | Byte-for-byte copy | CPU baselines for four models |
 | `data/processed/capacity-vulkan-35b-512mb-20261110.csv` | `runs/capacity-20261110T024052Z/capacity.csv` | 2026-11-10T02:40Z | Byte-for-byte copy | Vulkan `-ngl` sweep for the 35B at 512 MiB; all levels fail |
+| `data/processed/campaign-vulkan-16gb-20261112.csv` | `runs/campaign-20261112T004212Z/campaign.csv` | 2026-11-12T00:42Z | Byte-for-byte copy | Small-model matrix at 16 GB, 26 measurements |
+| `data/processed/campaign-vulkan-35b-16gb-20261112.csv` | `runs/campaign-20261112T011024Z/campaign.csv` | 2026-11-12T01:10Z | Byte-for-byte copy | 35B on Vulkan at 16 GB: 25.24 / 21.33 t/s |
+| `data/processed/campaign-cpu-35b-16gb-20261112.csv` | `runs/campaign-20261112T010823Z/campaign.csv` | 2026-11-12T01:08Z | Byte-for-byte copy | 35B on CPU at 16 GB: 13.78 t/s |
+| `data/processed/ab-quant-16gb-20261112.csv` | `runs/ab-quant-20261112T005957Z/ab.csv` | 2026-11-12T00:59Z | Byte-for-byte copy | IQ4 vs Q8 at 16 GB, three backends |
+| `data/processed/capacity-vulkan-35b-16gb-20261112.csv` | `runs/capacity-20261112T010916Z/capacity.csv` | 2026-11-12T01:09Z | Byte-for-byte copy | Vulkan `-ngl` sweep at 16 GB |
+| `data/processed/capacity-rocm-35b-16gb-20261112.csv` | `runs/capacity-20261112T011229Z/capacity.csv` | 2026-11-12T01:12Z | Byte-for-byte copy | ROCm `-ngl` sweep at 16 GB |
+| `data/processed/carveout-comparison-20261112.csv` | The 0.5 GB and 16 GB campaign CSVs | 2026-11-12 (computation) | Joined by `scripts/compare_carveouts.py` | Per-configuration 16 GB / 0.5 GB ratio |
 | `data/processed/ab-quant-20261110.csv` | `runs/ab-quant-20261110T023054Z/ab.csv` | 2026-11-10T02:30Z | Byte-for-byte copy | Interleaved IQ4 vs Q8 at depth 0, three backends |
 | `data/processed/ab-stability-20261110.csv` | `runs/ab-stability-20261110T021757Z/ab.csv` | 2026-11-10T02:17Z | Byte-for-byte copy | Six repetitions at depth 0, Vulkan vs ROCm |
 | `data/processed/roofline-campaign-20261110.csv` | `campaign-vulkan-20261110.csv` + `config/models.json` | 2026-11-10 (computation) | Computed by `scripts/roofline_campaign.py` | Depth-0 effective bandwidth per model |

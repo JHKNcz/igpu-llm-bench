@@ -96,6 +96,20 @@ not a result.
 Both write to `runs/`, which is git-ignored. Promote a run into `data/` only
 after sanitising it and adding a provenance row.
 
+## Memory settings
+
+Record the carve-out with every run. `scripts/carveout.sh --show` prints the
+index, the option table, VRAM, GTT and host RAM; `campaign.py` now stores the
+index and label in each row. To change it without a BIOS trip:
+
+```bash
+sudo ./scripts/carveout.sh --set-gb 16 --yes
+```
+
+GTT is a separate knob; `scripts/gtt-test.sh` measures which interface actually
+changes it. Until that is verified on your machine, treat GTT sizing as
+documented-but-unconfirmed.
+
 ## Style
 
 - **Numbers carry sources.** Every table row has a file, and ideally a line.

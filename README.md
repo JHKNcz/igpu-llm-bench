@@ -30,6 +30,9 @@ it compares two different memory settings and cannot be reproduced at one.
   for the same model but runs only ~20% faster, so effective bandwidth halves:
   22.5 vs 38.7 GB/s against an assumed 120 GB/s peak.
 - **MTP is a clear win (1.51x); DFlash2 is marginal (1.28x, CI 1.00–1.56).**
+- **At the 16 GB carve-out the 35B finally runs on Vulkan: 25.24 t/s at depth 0,
+  21.33 at 16K** — the best 35B result measured. Small models also decode
+  1.4–3.0x faster than at 0.5 GB, at the cost of host RAM.
 
 ## 1. Vulkan, ROCm and CPU at 0.5 GB
 
@@ -73,6 +76,27 @@ controller. The CPU has no driver or command-submission overhead. Prefill shows
 the opposite — 1,025 t/s on Vulkan vs 264 t/s on CPU for the same model — so the
 GPU is the right tool when the work is compute-dense. The numbers are measured;
 the mechanism is a hypothesis.
+
+## 1b. The other carve-out: 16 GB
+
+The carve-out is settable from Linux. At 16 GB (24,022 MiB GPU-addressable,
+15,277 MiB host) decode improves sharply, and the 35B becomes runnable on
+Vulkan:
+
+| Workload | 0.5 GB | 16 GB |
+|---|---:|---:|
+| LFM IQ4, depth 0 | 42.58 | 71.97 |
+| LFM IQ4, 16K | 42.10 | 60.82 |
+| LFM IQ4, 64K | 20.63 | 44.17 |
+| LFM Q8, 64K | 9.74 | 28.87 |
+| Qwen3-VL-4B, 16K | 5.46 | 12.54 |
+| **35B, Vulkan, depth 0** | **fails to load** | **25.24** |
+| 35B, ROCm, depth 0 | 17.66 | fails (5.00 at `-ngl 22`) |
+| 35B, CPU, depth 0 | 18.38 | 13.78 |
+
+Prefill at 64K is the exception: it is 0.56–0.61x of the 0.5 GB value, and the
+GPU reached 99 °C, so the comparison is thermally confounded. Full tables:
+[`RESULTS.md` §8](RESULTS.md).
 
 ## 2. Why the archive says 2.3x
 
@@ -158,6 +182,7 @@ from noise for every prompt, and the per-cell range is 0.94–1.69.
 | iGPU | Radeon 890M, `gfx1150`, RADV STRIX1, Mesa 26.0.8 |
 | Memory | 32 GB LPDDR5X (30 GiB visible); exact speed not recorded |
 | Carve-out used for §1 | **512 MiB VRAM + 15,439 MiB GTT, 30,878 MiB host** |
+| Carve-out control | `card*/device/uma/carveout` (index 0–7) or `amd-smi set -m` |
 | Carve-out in the archive | both 0.5 GB and 16 GB were used |
 | Kernel | `7.0.0-42-generic`; archived runs on `7.0.0-38-generic` |
 | NPU | `amdxdna` loaded, `/dev/accel/accel0` present; **unused** |
@@ -176,6 +201,7 @@ models; the 35B needs the MTP variant.
 export LLAMA_BENCH=$HOME/llama.cpp/build-vulkan/bin/llama-bench
 export MODELS_DIR=$HOME/models
 
+./scripts/carveout.sh --show       # current VRAM carve-out and GTT
 make campaign                      # Vulkan matrix, ~15 min
 python3 scripts/campaign_summary.py runs/campaign-*/campaign.csv
 python3 scripts/compare_backends.py --vulkan ... --rocm ...
@@ -218,6 +244,8 @@ Step-by-step, with the failure modes ordered by frequency:
 | `data/processed/runs-index.csv` | One row per reported run, with its source |
 | `data/provenance.md` | File → source → date → transformation |
 | `scripts/bench.sh` | One-shot `llama-bench` wrapper |
+| `scripts/carveout.sh` | Inspect/set the UMA carve-out and GTT |
+| `scripts/gtt-test.sh` | Measure which GTT interface actually works |
 | `scripts/campaign.py` | Matrix runner with sensors and CPU-fallback guard |
 | `scripts/capacity_probe.py` | How much of a model can be offloaded |
 | `scripts/compare_backends.py` | Join Vulkan and ROCm runs into a ratio table |

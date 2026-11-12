@@ -15,9 +15,11 @@ least four ways:
    The source tree is the same commit, but source identity does not prove binary
    provenance.
 2. **Memory carve-out.** The ROCm log’s 15,438 MiB is the UMA/GTT total, not a
-   15.4 GB dedicated allocation. Both BIOS settings were used (0.5 GB and
-   16 GB), but the two archived `llama-bench` files do not record which one they
-   ran under, and the settings differ in both capacity and host RAM.
+   15.4 GB dedicated allocation. Both settings were used (0.5 GB and 16 GB),
+   but the two archived `llama-bench` files do not record which one they ran
+   under, and the settings differ in both capacity and host RAM. The carve-out
+   is settable from Linux (`uma/carveout`, `amd-smi set -m`); the archived runs
+   recorded "BIOS reservation", so the method used then is not known.
 3. **Runtime.** The measured runtime is ROCm 10.0.0 (HIP 7.15.26333), identified
    by an exact image-ID match: `10.0.0-full` and `latest` are the same image
    (`docs/hardware.md`). The host has no ROCm installed, but the image is present
@@ -52,6 +54,9 @@ size is not settled.
   recorded; the current Mesa is 26.0.8.
 - The exact RAM type/speed is not recorded. The roofline uses 120 GB/s with
   102.4–128 GB/s sensitivity.
+- GTT sizing is only partly understood. `ttm.pages_limit` does not change the
+  aperture; `amd-smi set -G` is the correct command form but its persistence
+  across a reboot has not been measured. See `docs/hardware.md`.
 
 ## Missing files and runtime
 

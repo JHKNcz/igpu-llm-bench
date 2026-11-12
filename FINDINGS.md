@@ -51,6 +51,21 @@ The same ordering holds at depth 0 for every model tested, including the 35B:
    than IQ4 everywhere (40.4 vs 26.4 GB/s on the CPU), so the 4-bit path is
    paying a dequantization cost rather than winning on memory traffic.
 
+## The carve-out changes speed, not just capacity
+
+At 16 GB the same small models decode 1.4–3.0x faster, and the 35B runs on
+Vulkan at **25.24 t/s** where it could not load at 0.5 GB. The cost is host RAM
+(15.3 GiB): the 35B on CPU drops from 18.38 to 13.78 t/s.
+
+| 35B, depth 0 | 0.5 GB | 16 GB |
+|---|---:|---:|
+| Vulkan | fails | **25.24** |
+| ROCm | 17.66 | fails |
+| CPU | 18.38 | 13.78 |
+
+So "more VRAM" is not strictly better: 16 GB is best for models that fit the GPU,
+0.5 GB is the only setting where ROCm's unified-memory path runs the 35B.
+
 ## Speculative decoding
 
 MTP gives a solid 1.51x (95% CI 1.37–1.63). DFlash2 gives 1.28x but the interval
@@ -67,6 +82,18 @@ for every prompt.
 - The "2.3x" figure that started this project compares two different memory
   settings. It is kept in `RESULTS.md` with that caveat and is not a controlled
   result.
+
+## The memory setting is a command, not a BIOS trip
+
+On kernel 7.0.0-43 the carve-out is writable from Linux:
+
+```bash
+echo 7 | sudo tee /sys/class/drm/card*/device/uma/carveout   # 16 GB
+sudo amd-smi set -g 0 -m 7                                   # same
+```
+
+Two traps: the GPU is `card1` (not `card0`), and indices are 0-7. The write
+survives reboot. `scripts/carveout.sh --show` prints the state.
 
 ## How to check it
 

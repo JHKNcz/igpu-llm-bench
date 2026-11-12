@@ -1,5 +1,5 @@
 # Reproducible entry points. Run `make check` before committing.
-.PHONY: all data figures check scan campaign capacity compare ab order clean
+.PHONY: all data figures check scan campaign capacity compare ab order carveouts clean
 
 PYTHON ?= python3
 
@@ -42,6 +42,11 @@ ab:
 		--cpu-bench "$(CPU_BENCH)" \
 		--rocm-container "$(ROCM_IMAGE)" --rocm-mount "$(ROCM_MOUNT)" \
 		--rocm-model-root "$(ROCM_MODEL_ROOT)" --rounds $(ROUNDS)
+
+## Compare the same configurations at two carve-outs.
+carveouts:
+	$(PYTHON) scripts/compare_carveouts.py --old $(OLD) --new $(NEW) \
+		--out data/processed/carveout-comparison.csv
 
 ## Test whether a difference is order or thermal drift.
 order:

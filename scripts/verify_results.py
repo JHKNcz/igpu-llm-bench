@@ -174,6 +174,41 @@ def main() -> int:
         checks.append(("RESULTS.md", expected, f"{backend} {quant_name} d0"))
         checks.append(("README.md", expected, f"{backend} {quant_name} d0"))
 
+    # --- 16 GB carve-out claims --------------------------------------------
+    def median_campaign(file_name: str, backend: str, model: str,
+                        quant: str, depth: int, test: str = "tg128",
+                        kv: str = "f16") -> float | None:
+        rows = [
+            r for r in csv.DictReader((ROOT / "data/processed" / file_name).open(newline=""))
+            if r.get("status") == "ok"
+        ]
+        vals = [
+            float(r["tps"]) for r in rows
+            if r.get("backend", "").lower() == backend
+            and r["model"] == model and r["quant"] == quant
+            and int(r["depth"]) == depth and r["test"] == test
+            and r.get("threads") == "12" and r.get("kv") == kv
+        ]
+        return statistics.median(vals) if vals else None
+
+    checks_16 = [
+        ("campaign-vulkan-35b-16gb-20261112.csv", "vulkan", "Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", 0, "25.24"),
+        ("campaign-vulkan-35b-16gb-20261112.csv", "vulkan", "Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", 16384, "21.33"),
+        ("campaign-cpu-35b-16gb-20261112.csv", "cpu", "Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", 0, "13.78"),
+        ("campaign-vulkan-16gb-20261112.csv", "vulkan", "LFM2.5-8B-A1B", "UD-IQ4_NL", 0, "71.97"),
+        ("campaign-vulkan-16gb-20261112.csv", "vulkan", "LFM2.5-8B-A1B", "UD-IQ4_NL", 65536, "44.17"),
+        ("campaign-vulkan-16gb-20261112.csv", "vulkan", "LFM2.5-8B-A1B", "UD-Q8_K_XL", 65536, "28.87"),
+    ]
+    for file_name, backend, model, quant, depth, expected in checks_16:
+        actual = median_campaign(file_name, backend, model, quant, depth)
+        if actual is None or fmt2(actual) != expected:
+            print(f"FAIL 16gb: {model} {quant} d{depth} "
+                  f"{fmt2(actual) if actual is not None else 'missing'} != {expected}")
+            failures += 1
+            continue
+        checks.append(("RESULTS.md", expected, f"16 GB {model} d{depth}"))
+        checks.append(("README.md", expected, f"16 GB {model} d{depth}"))
+
     # The 35B must have no Vulkan measurement in any suite.
     for name in ("ab-a-20261110.csv", "ab-b-20261110.csv",
                  "campaign-vulkan-20261110.csv", "campaign-vulkan-20261110-kv-recheck.csv"):
@@ -183,6 +218,23 @@ def main() -> int:
         ):
             print(f"FAIL: unexpected Vulkan 35B measurement in {name}")
             failures += 1
+
+    # --- carve-out control surface must stay documented ---------------------
+    hw = (ROOT / "docs/hardware.md").read_text()
+    for needle, why in [
+        ("uma/carveout", "raw sysfs carve-out node"),
+        ("carveout_options", "index table"),
+        ("amd-smi set -g 0 -m", "amd-smi carve-out command"),
+        ("card1", "the card-number pitfall"),
+    ]:
+        if needle not in hw:
+            print(f"FAIL hardware doc: missing {needle!r} ({why})")
+            failures += 1
+        else:
+            print(f"ok   hardware doc: {needle!r}")
+    if not (ROOT / "data/raw/hardware/uma-carveout-2026-11-12.txt").exists():
+        print("FAIL: missing raw carve-out capture")
+        failures += 1
 
     # --- carve-out arithmetic must be internally consistent ------------------
     carve = load_carveouts()["settings"]

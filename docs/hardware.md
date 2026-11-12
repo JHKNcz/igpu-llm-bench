@@ -60,6 +60,100 @@ dedicated allocation. At the 0.5 GB setting the dedicated carve-out is
 **512 MiB, with ~15.08 GiB GTT**, matching the 15:31 JSON and the 2026-10-02 ROCm
 comparison note.
 
+### Changing the carve-out and GTT from Linux
+
+The carve-out is a UEFI setting, but on kernel 7.0.0-43 it is also writable at
+runtime. Two interfaces exist; both were confirmed on 2026-11-12.
+
+**Raw sysfs** (index, writable; the option table is read-only):
+
+```bash
+cat /sys/class/drm/card*/device/uma/carveout
+cat /sys/class/drm/card*/device/uma/carveout_options
+
+# 16 GB on this model is index 7
+echo 7 | sudo tee /sys/class/drm/card*/device/uma/carveout
+```
+
+**amd-smi** (same operation, higher-level tool):
+
+```bash
+amd-smi static --mem-carveout
+sudo amd-smi set -g 0 -m 7
+```
+
+Observed table on this machine (`card1`):
+
+```text
+0: Minimum (512 MB)     4: (6 GB)
+1: (1 GB)               5: Medium (8 GB)
+2: (2 GB)               6: (12 GB)
+3: (4 GB)               7: High (16 GB)
+```
+
+The write persists across a reboot: it goes through the EFI variable
+`UmaCarveOutIndexDefault`, which held `0` before the change and `7` after.
+
+**Pitfalls, both observed:**
+
+- The GPU is `card1`, not `card0`. `card0` does not exist and the write fails
+  with `No such file or directory`.
+- Valid indices are 0–7. `echo 8` is out of range.
+- The table is model-specific. Read `carveout_options` first; do not assume
+  index 7 means 16 GB on another laptop.
+
+Verify after a reboot:
+
+```bash
+cat /sys/class/drm/card*/device/uma/carveout
+echo $(( $(cat /sys/class/drm/card*/device/mem_info_vram_total) / 1048576 )) MiB
+amd-smi static --mem-carveout
+```
+
+`scripts/carveout.sh --show` prints all of the above, and
+`sudo scripts/carveout.sh --set-gb 16 --yes` maps a size to the right index
+without hardcoding one.
+
+#### GTT size
+
+GTT is the shared aperture the GPU can address, separate from the dedicated
+carve-out. At the 16 GB setting it is **7,638 MiB**; at 0.5 GB it was
+**15,438 MiB**. The two are a trade-off: the carve-out takes memory out of the
+host, and GTT is the remaining GPU-addressable window.
+
+There is no `uma/gtt` sysfs node. Two interfaces were tested on 2026-11-12:
+
+| Attempt | Result |
+|---|---|
+| `sudo amd-smi set -G 12` | **Rejected when combined with `-g`.** `-G` is system-wide: `--gtt/-G: not allowed with argument --gpu/-g`. The correct form is `amd-smi set -G 12` with no `-g`. |
+| `echo 3145728 > /sys/module/ttm/parameters/pages_limit` | Write succeeds (value changes to 3,145,728) but `mem_info_gtt_total` stays **7,638 MiB**. `pages_limit` is a TTM allocation cap, not the GTT aperture. |
+
+So `ttm.pages_limit` is **not** the GTT control. The remaining candidate is
+`amd-smi set -G <GB>` without `-g`, which was not exercised because the write
+needs interactive sudo and a reboot to confirm persistence.
+
+Fallback if that does not persist: the kernel command line,
+`amdgpu.gttsize=12288` (MB), which is applied at module load.
+
+```bash
+# correct form (system-wide, no -g)
+sudo amd-smi set -G 12
+
+# fallback, requires reboot
+# add to GRUB_CMDLINE_LINUX: amdgpu.gttsize=12288
+```
+
+`scripts/gtt-test.sh` runs both candidates, restores `pages_limit` afterwards,
+and logs before/after GTT and host RAM so the result can be recorded rather
+than assumed.
+
+### Measured state at 16 GB (2026-11-12)
+
+After writing index 7 and rebooting: VRAM 16,384 MiB, GTT 7,638 MiB, host
+15,277 MiB, GPU-addressable 24,022 MiB. Vulkan reports two heaps: 7.82 GiB
+host-visible and 14.92 GiB device-local. The 35B (17.25 GiB) loads because it
+spans both.
+
 ### Two carve-out settings, and why the records looked contradictory
 
 The records do not contradict each other. They are two different BIOS settings,
@@ -68,7 +162,7 @@ both of which the operator used, each with its own memory profile:
 | Setting | GPU pool | GTT | Host-visible RAM | GPU-addressable total | 35B full offload |
 |---|---:|---:|---:|---:|---|
 | **0.5 GB** | 512 MiB | 15,438 MiB | 30,877 MiB | 15,950 MiB (15.58 GiB) | ROCm works, via unified memory into host RAM |
-| **16 GB** | 16,384 MiB | 7,638 MiB | 15,277 MiB | 24,022 MiB (23.46 GiB) | ROCm **fails**; Vulkan works |
+| **16 GB** | 16,384 MiB | 7,638 MiB | 15,277 MiB | 24,022 MiB (23.46 GiB) | ROCm full offload **fails**; Vulkan loads at 25.24 t/s |
 
 The 24,022 MiB figure is the "24 GB usable for inference" the operator reports,
 and it matches the Vulkan budget recorded in

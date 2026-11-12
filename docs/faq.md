@@ -41,6 +41,26 @@ Only for the ROCm arm. The Vulkan arm needs just Mesa's RADV driver, which is
 present on a stock Ubuntu install. The source machine no longer has `/opt/rocm`,
 so its ROCm numbers cannot be re-run without a rebuild or the original container.
 
+### "How do I change the VRAM carve-out without going into BIOS?"
+
+On kernel 7.0.0-43 the carve-out is writable at runtime:
+
+```bash
+cat /sys/class/drm/card*/device/uma/carveout          # current index
+cat /sys/class/drm/card*/device/uma/carveout_options  # index table
+
+echo 7 | sudo tee /sys/class/drm/card*/device/uma/carveout   # 16 GB
+sudo amd-smi set -g 0 -m 7                                   # same, via amd-smi
+```
+
+Two traps, both hit in practice: the GPU is `card1` (not `card0`), and valid
+indices are 0–7. Reboot and verify with
+`echo $(( $(cat /sys/class/drm/card*/device/mem_info_vram_total) / 1048576 ))`.
+`scripts/carveout.sh --show` prints the current state and
+`sudo scripts/carveout.sh --set-gb 16 --yes` picks the index for you.
+
+GTT is a separate knob (`amd-smi set -g 0 -G <GB>`); see `docs/hardware.md`.
+
 ## Running the benchmark
 
 ### "llama-bench says `error while loading shared libraries: libllama-bench-impl.so`"

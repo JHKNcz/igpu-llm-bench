@@ -79,8 +79,21 @@ def read_int(path: str) -> int | None:
 
 
 def carveout() -> dict[str, object]:
-    """Current memory split, read from sysfs. Not changed by this script."""
+    """Current memory split and carve-out index, read from sysfs.
+
+    The index is the value the UEFI/`amd-smi` interface writes; recording it
+    makes a run self-identifying even if sysfs is read after a reboot.
+    """
     vram = gtt = None
+    index = label = None
+    for candidate in Path("/sys/class/drm").glob("card*/device/uma/carveout"):
+        index = read_int(str(candidate))
+        options = candidate.with_name("carveout_options")
+        if index is not None and options.exists():
+            for line in options.read_text().splitlines():
+                if line.startswith(f"{index}:"):
+                    label = line.split(":", 1)[1].strip()
+                    break
     for candidate in Path("/sys/class/drm").glob("card*/device/mem_info_vram_total"):
         vram = read_int(str(candidate))
     for candidate in Path("/sys/class/drm").glob("card*/device/mem_info_gtt_total"):
@@ -96,6 +109,8 @@ def carveout() -> dict[str, object]:
         "vram_total_mib": round(vram / 2**20) if vram else None,
         "gtt_total_mib": round(gtt / 2**20) if gtt else None,
         "host_total_mib": round(host_kb / 1024) if host_kb else None,
+        "carveout_index": index,
+        "carveout_label": label,
     }
 
 
@@ -225,6 +240,7 @@ def main() -> int:
     )
     parser.add_argument("--reps", type=int, default=3)
     parser.add_argument("--threads", type=int, default=12)
+    parser.add_argument("--ngl", type=int, default=999, help="GPU layers")
     parser.add_argument(
         "--warmup",
         action="store_true",
@@ -358,7 +374,8 @@ def main() -> int:
     fieldnames = [
         "run_id", "model", "quant", "kv", "threads", "reps", "backend", "ngl",
         "fa", "test", "depth", "tps", "tps_sd", "size_gib", "params_b",
-        "status", "noisy", "error", "carveout_mib", "gtt_mib", "host_mib",
+        "status", "noisy", "error", "carveout_mib", "carveout_index",
+        "carveout_label", "gtt_mib", "host_mib",
         "cpu_temp_c_max", "gpu_temp_c_max", "gpu_power_w_max", "build",
     ]
     records: list[dict[str, object]] = []
@@ -380,7 +397,7 @@ def main() -> int:
 
         for depth in depths:
             bench_args = [
-                to_container(bench), "-m", to_container(path), "-ngl", "999", "-fa", "on",
+                to_container(bench), "-m", to_container(path), "-ngl", str(args.ngl), "-fa", "on",
                 "-t", str(threads), "-b", "2048", "-ub", "512",
                 "-p", "512", "-n", "128", "-r", str(reps), "-d", str(depth),
             ]
@@ -421,6 +438,8 @@ def main() -> int:
                         "depth": depth, "status": "error",
                         "error": "backend fell back to CPU: " + fallback.group(0),
                         "carveout_mib": meta["carveout"]["vram_total_mib"],
+                        "carveout_index": meta["carveout"]["carveout_index"],
+                        "carveout_label": meta["carveout"]["carveout_label"],
                         "gtt_mib": meta["carveout"]["gtt_total_mib"],
                         "host_mib": meta["carveout"]["host_total_mib"],
                     }
@@ -439,6 +458,8 @@ def main() -> int:
                         "threads": threads, "reps": reps, "test": "load",
                         "depth": depth, "status": "error", "error": error,
                         "carveout_mib": meta["carveout"]["vram_total_mib"],
+                        "carveout_index": meta["carveout"]["carveout_index"],
+                        "carveout_label": meta["carveout"]["carveout_label"],
                         "gtt_mib": meta["carveout"]["gtt_total_mib"],
                         "host_mib": meta["carveout"]["host_total_mib"],
                         **{k: v for k, v in sensors.items() if k.endswith("_max")},
@@ -473,6 +494,8 @@ def main() -> int:
                         ),
                         "error": "",
                         "carveout_mib": meta["carveout"]["vram_total_mib"],
+                        "carveout_index": meta["carveout"]["carveout_index"],
+                        "carveout_label": meta["carveout"]["carveout_label"],
                         "gtt_mib": meta["carveout"]["gtt_total_mib"],
                         "host_mib": meta["carveout"]["host_total_mib"],
                         "cpu_temp_c_max": sensors.get("cpu_temp_c_max"),

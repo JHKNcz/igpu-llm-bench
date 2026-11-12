@@ -378,3 +378,85 @@ and hypotheses are in [`analysis/roofline.md`](analysis/roofline.md).
 
 See [`docs/limitations.md`](docs/limitations.md) for what each gap means and
 what would close it.
+
+## 8. Second carve-out: 16 GB (2026-11-12)
+
+The carve-out is settable from Linux (`docs/hardware.md`). Measured state:
+**16,384 MiB VRAM, 7,638 MiB GTT, 15,277 MiB host, 24,022 MiB
+GPU-addressable**, kernel 7.0.0-43, ROCm 10.0.0.
+
+### 8a. Small models are much faster at 16 GB
+
+Same models, same flags, same machine; decode (`tg128`) ratio 16 GB / 0.5 GB:
+
+| Model | KV | Depth | 0.5 GB | 16 GB | Ratio |
+|---|---|---:|---:|---:|---:|
+| LFM IQ4_NL | F16 | 0 | 42.58 | 71.97 | 1.69x |
+| LFM IQ4_NL | F16 | 16K | 42.10 | 60.82 | 1.44x |
+| LFM IQ4_NL | F16 | 64K | 20.63 | 44.17 | 2.14x |
+| LFM IQ4_NL | Q8_0 | 0 | 39.74 | 70.70 | 1.78x |
+| LFM IQ4_NL | Q8_0 | 64K | 19.87 | 46.37 | 2.33x |
+| LFM Q8_K_XL | F16 | 0 | 35.12 | 38.10 | 1.08x |
+| LFM Q8_K_XL | F16 | 16K | 18.27 | 35.38 | 1.94x |
+| LFM Q8_K_XL | F16 | 64K | 9.74 | 28.87 | 2.96x |
+| Qwen3-VL-4B Q8 | F16 | 0 | 11.74 | 17.99 | 1.53x |
+| Qwen3-VL-4B Q8 | F16 | 16K | 5.46 | 12.54 | 2.30x |
+
+Prefill goes the other way at long depth: `pp512 @ d65536` is **0.56x–0.61x**
+of the 0.5 GB value, and the GPU reached **99 °C** during those runs. The
+16 GB numbers are therefore faster but thermally confounded; the comparison is
+not a clean carve-out experiment.
+
+Source: `data/processed/carveout-comparison-20261112.csv`.
+
+### 8b. The 35B runs best at 16 GB, on Vulkan
+
+| Carve-out | Backend | Depth 0 | Depth 16K | Note |
+|---|---|---:|---:|---|
+| 0.5 GB | Vulkan | — | — | `DeviceLost` at every `-ngl` |
+| 0.5 GB | ROCm | 17.66 | 14.54 | unified memory into 30 GiB host |
+| 0.5 GB | CPU | 18.38 | — | 30 GiB host RAM |
+| **16 GB** | **Vulkan** | **25.24** | **21.33** | best measured 35B result |
+| 16 GB | ROCm | — | — | full offload fails; `-ngl 22` gives 5.00 t/s |
+| 16 GB | CPU | 13.78 | — | host RAM 15.3 GiB, so it pages |
+
+The 35B is 17.25 GiB. At 16 GB the GPU has 24,022 MiB addressable across two
+Vulkan heaps (7.82 GiB host-visible + 14.92 GiB device-local), so Vulkan can
+place it; at 0.5 GB the total is 15,950 MiB and it cannot.
+
+**Loading is not deterministic under desktop load.** The first `-ngl` sweep
+immediately after a benchmark run failed at every level; a repeat with the GPU
+idle loaded at `-ngl 999`. The sweep is also non-monotonic: `-ngl 28` loads and
+`-ngl 22` fails, reproducibly.
+
+Source: `data/processed/capacity-vulkan-35b-16gb-20261112.csv`,
+`data/processed/capacity-rocm-35b-16gb-20261112.csv`,
+`data/processed/campaign-vulkan-35b-16gb-20261112.csv`,
+`data/processed/campaign-cpu-35b-16gb-20261112.csv`.
+
+### 8c. Quantization at 16 GB
+
+Depth 0, interleaved, four rounds, medians:
+
+| Backend | IQ4_NL | Q8_K_XL | IQ4/Q8 |
+|---|---:|---:|---:|
+| Vulkan | 71.24 | 38.09 | 1.87x |
+| ROCm | 39.55 | 32.67 | 1.21x |
+| CPU | 53.13 | 36.98 | 1.44x |
+
+Bytes ratio is 2.15x. Vulkan stays closest to bandwidth-bound; ROCm's IQ4/Q8
+ratio falls from 1.55x at 0.5 GB to 1.21x here, and ROCm IQ4 is *slower* at
+16 GB than at 0.5 GB (39.55 vs 44.86), which is not explained.
+
+Source: `data/processed/ab-quant-16gb-20261112.csv`.
+
+### 8d. Practical conclusion
+
+For this machine and these models: **16 GB is better for everything that fits,
+and it is the only setting where the 35B runs on Vulkan at full offload.** The
+cost is host RAM (15.3 GiB), which makes CPU inference of the 35B slower
+(13.78 vs 18.38 t/s) and leaves less headroom for other work. At 0.5 GB the 35B
+runs only through ROCm's unified memory or on the CPU.
+
+The 0.5 GB setting is not "worse" in general: it is the setting where ROCm's
+unified-memory path works, and it leaves 30 GiB for the host.

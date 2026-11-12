@@ -1,0 +1,40 @@
+# UMA carve-out and GTT state
+# captured: 2026-11-12T00:39:49Z
+# kernel: 7.0.0-43-generic
+
+## amd-smi version
+AMDSMI Tool: 26.2.1+unknown | AMDSMI Library version: 26.2.1 | ROCm version: N/A | amdgpu version: Linuxversion7.0.0-43-generic(buildd@lcy02-amd64-080)(x86_64-linux-gnu-gcc(Ubuntu15.2.0-16ubuntu1)15.2.0,GNUld(GNUBinutilsforUbuntu)2.46)#43-UbuntuSMPPREEMPT_DYNAMICFriOct2313:25:25UTC2026 | hsmp version: N/A
+
+## amd-smi static --mem-carveout
+GPU: 0
+    MEM_CARVEOUT: 
+         [0] Minimum (512 MB)
+         [1] (1 GB)
+         [2] (2 GB)
+         [3] (4 GB)
+         [4] (6 GB)
+         [5] Medium (8 GB)
+         [6] (12 GB)
+        *[7] High (16 GB)
+
+
+## sysfs carveout
+7
+
+## carveout_options
+0: Minimum (512 MB)
+1:  (1 GB)
+2:  (2 GB)
+3:  (4 GB)
+4:  (6 GB)
+5: Medium (8 GB)
+6:  (12 GB)
+7: High (16 GB)
+
+## memory
+mem_info_vram_total = 16384 MiB
+mem_info_gtt_total = 7638 MiB
+
+## host
+               total        used        free      shared  buff/cache   available
+Mem:           15277        4413         404          64       10858       10864

@@ -38,6 +38,14 @@ for f in /sys/class/drm/card*/device/mem_info_vram_total \
          /sys/class/drm/card*/device/mem_info_gtt_total; do
   [ -r "$f" ] && printf '%s = %s\n' "$f" "$(cat "$f")"
 done
+./scripts/carveout.sh --show
+```
+
+- [ ] If it is the wrong setting, change it (no BIOS needed on kernel 7.0.0-43):
+
+```bash
+sudo ./scripts/carveout.sh --set-gb 16 --yes
+# then reboot and re-check
 ```
 
 - [ ] Write down whether it is 512 MiB or ~16 GiB. This is the single largest

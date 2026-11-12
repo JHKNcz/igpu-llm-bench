@@ -2,6 +2,37 @@
 
 All notable changes to this repository. Dates are UTC unless stated.
 
+## 2026-11-12 — 16 GB carve-out campaign
+
+Measured at index 7 (16,384 MiB VRAM, 7,638 MiB GTT, 15,277 MiB host).
+
+- **The 35B runs on Vulkan at 16 GB: 25.24 t/s at depth 0, 21.33 at 16K** — the
+  best 35B result in the repository. At 0.5 GB it cannot load at all.
+- Small models decode 1.4–3.0x faster at 16 GB. Prefill at 64K is 0.56–0.61x
+  slower, and the GPU reached 99 °C; the comparison is thermally confounded.
+- ROCm at 16 GB cannot fully offload the 35B; `-ngl 22` gives 5.00 t/s.
+- CPU 35B drops from 18.38 to 13.78 t/s because host RAM falls to 15.3 GiB.
+- Loading the 35B on Vulkan is **not deterministic under desktop load**: an
+  idle repeat loads at `-ngl 999`, and the sweep is non-monotonic (`-ngl 28`
+  loads, `-ngl 22` fails).
+- Added `scripts/compare_carveouts.py`, `make carveouts`, and carve-out index
+  and label in every campaign row.
+
+## 2026-11-12 — Carve-out is settable from Linux
+
+- **Corrected a claim.** The VRAM carve-out is not BIOS-only. On kernel
+  7.0.0-43 it is writable at
+  `/sys/class/drm/card*/device/uma/carveout` (index 0–7) and through
+  `amd-smi set -g 0 -m <index>`.
+- Confirmed 16 GB: index 7, VRAM 16,384 MiB, GTT 7,638 MiB, host 15,277 MiB,
+  GPU-addressable 24,022 MiB. It survives a reboot via
+  `UmaCarveOutIndexDefault`.
+- Recorded the two traps: the GPU is `card1` (not `card0`) and index 8 is
+  invalid.
+- Added `scripts/carveout.sh` (`--show`, `--set-gb`, `--set-index`, `--gtt-gb`).
+- GTT commands are documented but **unverified**; the write needs interactive
+  sudo and has not been run on this machine yet.
+
 ## 2026-11-10 — Randomised replication, CPU baselines, corrections
 
 Three new suites, all at the unchanged 512 MiB carve-out.
