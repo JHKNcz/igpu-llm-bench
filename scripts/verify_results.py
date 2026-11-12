@@ -229,6 +229,29 @@ def main() -> int:
             print(f"FAIL: unexpected Vulkan 35B measurement in {name}")
             failures += 1
 
+    # --- model citations must stay exact ------------------------------------
+    models_doc = (ROOT / "docs/models.md").read_text()
+    cfg = json.loads((ROOT / "config/models.json").read_text())["models"]
+    for key in ("target_qwen35", "mtp_qwen35", "draft_dflash2", "draft_dflash1",
+                "lfm_iq4_nl", "lfm_q8_k_xl", "qwen3vl_4b_q8"):
+        entry = cfg.get(key, {})
+        repo = entry.get("hf_repo")
+        if not repo:
+            print(f"FAIL models: {key} has no hf_repo")
+            failures += 1
+            continue
+        if repo not in models_doc:
+            print(f"FAIL models: docs/models.md missing {repo}")
+            failures += 1
+        revision = entry.get("hf_revision")
+        if revision and revision[:12] not in models_doc:
+            print(f"FAIL models: docs/models.md missing revision {revision[:12]} for {key}")
+            failures += 1
+    for needle in ("LFM1.0", "Apache-2.0", "nextn_predict_layers"):
+        if needle not in models_doc:
+            print(f"FAIL models doc: missing {needle!r}")
+            failures += 1
+
     # --- disclaimer must exist and be reachable from the front page ---------
     disc = ROOT / "DISCLAIMER.md"
     if not disc.exists():

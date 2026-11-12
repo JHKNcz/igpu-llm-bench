@@ -21,6 +21,10 @@ material is cited so a reader can check the context, not to borrow authority.
 
 ## Models
 
+Exact repository, revision and licence for each file, verified against the
+Hugging Face API: [`models.md`](models.md).
+
+
 - **Qwen3.6-35B-A3B**, Apache-2.0, quantized to `UD-IQ4_NL` by Unsloth.
   Metadata read from the GGUF, not from an external card. The exact file is
   identified by size and SHA256 in `config/models.json`.

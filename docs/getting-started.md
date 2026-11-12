@@ -112,6 +112,9 @@ Backends differ in how they allocate:
 
 Start with a 4–8 GiB quant. Move up only after a baseline works.
 
+Exact repositories, revisions and licences for the models measured here:
+[`models.md`](models.md). Note that LFM2.5 is **LFM1.0**, not Apache-2.0.
+
 ## 5. Run your first benchmark
 
 ```bash

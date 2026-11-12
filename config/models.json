@@ -10,7 +10,11 @@
       "bytes": 18040888288,
       "sha256": "0d17e255dc257a11f398ed4bc8d62412d8ce9ca24b3fce2947d962e4bfed5758",
       "present": false,
-      "notes": "Exact target used for the archived 35B runs. The file is not in this repository and was absent from the source machine on 2026-11-05."
+      "notes": "Exact target used for the archived 35B runs. The file is not in this repository and was absent from the source machine on 2026-11-05.",
+      "base_model": "Qwen/Qwen3.6-35B-A3B",
+      "hf_repo": "unsloth/Qwen3.6-35B-A3B-GGUF",
+      "hf_revision": null,
+      "license": "Apache-2.0"
     },
     "draft_dflash2": {
       "role": "draft",
@@ -20,7 +24,11 @@
       "bytes": 1063708928,
       "sha256": "3aa9bae5332415f5563918a8b31c82e913add862446159f41a20e756c49b065f",
       "present": false,
-      "notes": "GGUF draft is missing; the source machine retains the BF16 safetensors and config only."
+      "notes": "GGUF draft is missing; the source machine retains the BF16 safetensors and config only.",
+      "base_model": "incoai/Qwen3.6-35B-A3B-DFlash2",
+      "hf_repo": "incoai/Qwen3.6-35B-A3B-DFlash2",
+      "hf_revision": "51ef7b6923ad6c14cb1bb41c37a9041446496ab6",
+      "license": "Apache-2.0"
     },
     "draft_dflash1": {
       "role": "draft",
@@ -30,7 +38,11 @@
       "bytes": null,
       "sha256": "6ce38bc63e6b622ce1c6fff4ac8eb5fa08dfab802b1bf1841890abcca1bb46fd",
       "present": false,
-      "notes": "Older DFlash draft used by dflash-rocm.log; block_size=16, not DFlash2. The log reports 736.12 MiB; exact bytes were not recorded."
+      "notes": "Older DFlash draft used by dflash-rocm.log; block_size=16, not DFlash2. The log reports 736.12 MiB; exact bytes were not recorded.",
+      "base_model": "z-lab/Qwen3.6-35B-A3B-DFlash",
+      "hf_repo": "z-lab/Qwen3.6-35B-A3B-DFlash",
+      "hf_revision": "f181eece646affea2c38b2765f1aaa01a9734ccd",
+      "license": "Apache-2.0"
     },
     "mtp_qwen35": {
       "role": "target_with_mtp",
@@ -41,7 +53,11 @@
       "sha256": null,
       "present": true,
       "notes": "MTP-capable target used by the 2026-10-18 speculative comparison. SHA256 was not recorded.",
-      "active_params_b": 3.0
+      "active_params_b": 3.0,
+      "base_model": "Qwen/Qwen3.6-35B-A3B",
+      "hf_repo": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
+      "hf_revision": "5bc3e238d916f48a861bac2f8a1990a0e9b7e98d",
+      "license": "Apache-2.0"
     },
     "lfm_iq4_nl": {
       "role": "small_target",
@@ -52,7 +68,11 @@
       "sha256": null,
       "present": true,
       "notes": "Present on the source machine; useful for a short harness smoke test.",
-      "active_params_b": 1.0
+      "active_params_b": 1.0,
+      "base_model": "LiquidAI/LFM2.5-8B-A1B",
+      "hf_repo": "unsloth/LFM2.5-8B-A1B-GGUF",
+      "hf_revision": "37563684c4a625e9958906fd924e15095cf9c896",
+      "license": "LFM1.0"
     },
     "lfm_q8_k_xl": {
       "role": "small_target",
@@ -63,7 +83,11 @@
       "sha256": null,
       "present": true,
       "notes": "Present on the source machine.",
-      "active_params_b": 1.0
+      "active_params_b": 1.0,
+      "base_model": "LiquidAI/LFM2.5-8B-A1B",
+      "hf_repo": "unsloth/LFM2.5-8B-A1B-GGUF",
+      "hf_revision": "37563684c4a625e9958906fd924e15095cf9c896",
+      "license": "LFM1.0"
     },
     "qwen3vl_4b_q8": {
       "role": "dense_control",
@@ -74,7 +98,11 @@
       "sha256": null,
       "present": true,
       "active_params_b": 4.0,
-      "notes": "Dense 4B vision-language model, used as a non-MoE control for the roofline. Text-only decode."
+      "notes": "Dense 4B vision-language model, used as a non-MoE control for the roofline. Text-only decode.",
+      "base_model": "Qwen/Qwen3-VL-4B-Instruct",
+      "hf_repo": "unsloth/Qwen3-VL-4B-Instruct-GGUF",
+      "hf_revision": "00c00da0690c4b14b5539b02c4ea5d7c9102b35e",
+      "license": "Apache-2.0"
     }
   },
   "binaries": {
@@ -153,5 +181,6 @@
         "layers_total": 41
       }
     }
-  }
+  },
+  "citations_note": "Sources verified against the Hugging Face API; see docs/models.md. Revision is the download commit, not the current head."
 }

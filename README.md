@@ -299,6 +299,7 @@ Step-by-step, with the failure modes ordered by frequency:
 | `docs/related/backend-comparison-512mb.md` | The controlled A/B, in full |
 | `docs/getting-started.md` | Build, carve-out, first model, first benchmark |
 | `docs/methodology.md` | Flags, repetitions, warmup, protocols |
+| `docs/models.md` | Exact Hugging Face repo, revision and licence for every model |
 | `docs/memory.md` | RAM, VRAM carve-out, GTT and shared memory, with the arithmetic |
 | `docs/hardware.md` | CPU, iGPU, RAM, both carve-outs, model architecture |
 | `docs/limitations.md` | Confounds, missing data, what would close each gap |
@@ -313,6 +314,7 @@ Step-by-step, with the failure modes ordered by frequency:
 | `data/processed/runs-index.csv` | One row per reported run, with its source |
 | `data/provenance.md` | File → source → date → transformation |
 | `scripts/bench.sh` | One-shot `llama-bench` wrapper |
+| `scripts/check_models.py` | Verify a local GGUF against the recorded source |
 | `scripts/carveout.sh` | Inspect/set the UMA carve-out and GTT |
 | `scripts/gtt-test.sh` | Measure which GTT interface actually works |
 | `scripts/campaign.py` | Matrix runner with sensors and CPU-fallback guard |
