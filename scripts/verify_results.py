@@ -192,8 +192,9 @@ def main() -> int:
         return statistics.median(vals) if vals else None
 
     checks_16 = [
-        ("campaign-vulkan-35b-16gb-20261112.csv", "vulkan", "Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", 0, "25.24"),
-        ("campaign-vulkan-35b-16gb-20261112.csv", "vulkan", "Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", 16384, "21.33"),
+        ("campaign-vulkan-35b-16gb-5rep-20261112.csv", "vulkan", "Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", 0, "24.19"),
+        ("campaign-vulkan-35b-16gb-5rep-20261112.csv", "vulkan", "Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", 16384, "20.45"),
+        ("campaign-vulkan-35b-16gb-64k-20261112.csv", "vulkan", "Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", 65536, "14.68"),
         ("campaign-cpu-35b-16gb-20261112.csv", "cpu", "Qwen3.6-35B-A3B-MTP", "UD-IQ4_NL", 0, "13.78"),
         ("campaign-vulkan-16gb-20261112.csv", "vulkan", "LFM2.5-8B-A1B", "UD-IQ4_NL", 0, "71.97"),
         ("campaign-vulkan-16gb-20261112.csv", "vulkan", "LFM2.5-8B-A1B", "UD-IQ4_NL", 65536, "44.17"),
@@ -208,6 +209,15 @@ def main() -> int:
             continue
         checks.append(("RESULTS.md", expected, f"16 GB {model} d{depth}"))
         checks.append(("README.md", expected, f"16 GB {model} d{depth}"))
+
+    # The 16 GB campaign must use the MTP variant, not the absent headline file.
+    for name in ("campaign-vulkan-35b-16gb-20261112.csv",
+                 "campaign-cpu-35b-16gb-20261112.csv"):
+        rows = list(csv.DictReader((ROOT / "data/processed" / name).open(newline="")))
+        labels = {r["model"] for r in rows if "35B" in r.get("model", "")}
+        if labels != {"Qwen3.6-35B-A3B-MTP"}:
+            print(f"FAIL: {name} 35B labels {labels}")
+            failures += 1
 
     # The 35B must have no Vulkan measurement in any suite.
     for name in ("ab-a-20261110.csv", "ab-b-20261110.csv",

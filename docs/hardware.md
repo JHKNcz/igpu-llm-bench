@@ -162,7 +162,7 @@ both of which the operator used, each with its own memory profile:
 | Setting | GPU pool | GTT | Host-visible RAM | GPU-addressable total | 35B full offload |
 |---|---:|---:|---:|---:|---|
 | **0.5 GB** | 512 MiB | 15,438 MiB | 30,877 MiB | 15,950 MiB (15.58 GiB) | ROCm works, via unified memory into host RAM |
-| **16 GB** | 16,384 MiB | 7,638 MiB | 15,277 MiB | 24,022 MiB (23.46 GiB) | ROCm full offload **fails**; Vulkan loads at 25.24 t/s |
+| **16 GB** | 16,384 MiB | 7,638 MiB | 15,277 MiB | 24,022 MiB (23.46 GiB) | ROCm full offload **fails**; Vulkan loads at 24.19 t/s |
 
 The 24,022 MiB figure is the "24 GB usable for inference" the operator reports,
 and it matches the Vulkan budget recorded in

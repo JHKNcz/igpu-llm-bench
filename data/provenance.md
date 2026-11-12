@@ -43,7 +43,9 @@ the table says so.
 | `data/processed/ab-cpu-20261110.csv` | `runs/ab-cpu-20261110T014430Z/ab.csv` | 2026-11-10T01:44Z | Byte-for-byte copy | CPU baselines for four models |
 | `data/processed/capacity-vulkan-35b-512mb-20261110.csv` | `runs/capacity-20261110T024052Z/capacity.csv` | 2026-11-10T02:40Z | Byte-for-byte copy | Vulkan `-ngl` sweep for the 35B at 512 MiB; all levels fail |
 | `data/processed/campaign-vulkan-16gb-20261112.csv` | `runs/campaign-20261112T004212Z/campaign.csv` | 2026-11-12T00:42Z | Byte-for-byte copy | Small-model matrix at 16 GB, 26 measurements |
-| `data/processed/campaign-vulkan-35b-16gb-20261112.csv` | `runs/campaign-20261112T011024Z/campaign.csv` | 2026-11-12T01:10Z | Byte-for-byte copy | 35B on Vulkan at 16 GB: 25.24 / 21.33 t/s |
+| `data/processed/campaign-vulkan-35b-16gb-20261112.csv` | `runs/campaign-20261112T011024Z/campaign.csv` | 2026-11-12T01:10Z | Byte-for-byte copy | 35B on Vulkan at 16 GB, 2 reps; **superseded** by the 5-rep run |
+| `data/processed/campaign-vulkan-35b-16gb-5rep-20261112.csv` | `runs/campaign-20261112T133049Z/campaign.csv` | 2026-11-12T13:30Z | Byte-for-byte copy | 35B on Vulkan at 16 GB, 5 reps: 24.19 / 20.45 t/s |
+| `data/processed/campaign-vulkan-35b-16gb-64k-20261112.csv` | `runs/campaign-20261112T133329Z/campaign.csv` | 2026-11-12T13:33Z | Byte-for-byte copy | 35B on Vulkan at 16 GB, depth 64K, 2 reps: 14.68 t/s |
 | `data/processed/campaign-cpu-35b-16gb-20261112.csv` | `runs/campaign-20261112T010823Z/campaign.csv` | 2026-11-12T01:08Z | Byte-for-byte copy | 35B on CPU at 16 GB: 13.78 t/s |
 | `data/processed/ab-quant-16gb-20261112.csv` | `runs/ab-quant-20261112T005957Z/ab.csv` | 2026-11-12T00:59Z | Byte-for-byte copy | IQ4 vs Q8 at 16 GB, three backends |
 | `data/processed/capacity-vulkan-35b-16gb-20261112.csv` | `runs/capacity-20261112T010916Z/capacity.csv` | 2026-11-12T01:09Z | Byte-for-byte copy | Vulkan `-ngl` sweep at 16 GB |

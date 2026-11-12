@@ -6,8 +6,10 @@ All notable changes to this repository. Dates are UTC unless stated.
 
 Measured at index 7 (16,384 MiB VRAM, 7,638 MiB GTT, 15,277 MiB host).
 
-- **The 35B runs on Vulkan at 16 GB: 25.24 t/s at depth 0, 21.33 at 16K** — the
-  best 35B result in the repository. At 0.5 GB it cannot load at all.
+- **The 35B runs on Vulkan at 16 GB: 24.19 t/s at depth 0, 20.45 at 16K,
+  14.68 at 64K** (5/5/2 repetitions, spread under 1%) — the best 35B result in
+  the repository. At 0.5 GB it cannot load at all. A preliminary 2-repetition
+  run read 25.24/21.33 and is superseded.
 - Small models decode 1.4–3.0x faster at 16 GB. Prefill at 64K is 0.56–0.61x
   slower, and the GPU reached 99 °C; the comparison is thermally confounded.
 - ROCm at 16 GB cannot fully offload the 35B; `-ngl 22` gives 5.00 t/s.

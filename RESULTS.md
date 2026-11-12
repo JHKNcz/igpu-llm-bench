@@ -416,9 +416,15 @@ Source: `data/processed/carveout-comparison-20261112.csv`.
 | 0.5 GB | Vulkan | — | — | `DeviceLost` at every `-ngl` |
 | 0.5 GB | ROCm | 17.66 | 14.54 | unified memory into 30 GiB host |
 | 0.5 GB | CPU | 18.38 | — | 30 GiB host RAM |
-| **16 GB** | **Vulkan** | **25.24** | **21.33** | best measured 35B result |
+| **16 GB** | **Vulkan** | **24.19** | **20.45** | best measured 35B result |
 | 16 GB | ROCm | — | — | full offload fails; `-ngl 22` gives 5.00 t/s |
 | 16 GB | CPU | 13.78 | — | host RAM 15.3 GiB, so it pages |
+
+**Model identity:** every 35B number in this repository is the **MTP variant**
+(`Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf`, 17.25 GiB, 35.51 B parameters,
+41 layers). The archived comparison used a different file,
+`Qwen3.6-35B-A3B-UD-IQ4_NL.gguf` (16.79 GiB, 34.66 B, 40 layers), which is not
+on disk. The two are not directly comparable.
 
 The 35B is 17.25 GiB. At 16 GB the GPU has 24,022 MiB addressable across two
 Vulkan heaps (7.82 GiB host-visible + 14.92 GiB device-local), so Vulkan can
@@ -429,9 +435,24 @@ immediately after a benchmark run failed at every level; a repeat with the GPU
 idle loaded at `-ngl 999`. The sweep is also non-monotonic: `-ngl 28` loads and
 `-ngl 22` fails, reproducibly.
 
+Vulkan at 16 GB, with repetitions and a third depth:
+
+| Depth | tg128 | pp512 | Reps |
+|---|---:|---:|---:|
+| 0 | 24.19 ± 0.23 | 367.38 ± 26.48 | 5 |
+| 16,384 | 20.45 ± 0.17 | 221.47 ± 8.42 | 5 |
+| 65,536 | 14.68 ± 0.12 | 65.92 ± 3.36 | 2 |
+
+Decode falls 39% from depth 0 to 64K; prefill falls 82%. The spread at 5
+repetitions is under 1%, so these are the most stable numbers in the repository.
+
+An earlier 2-repetition run gave 25.24 / 21.33; the 5-repetition medians are
+24.19 / 20.45, so the earlier values were ~4% high and are superseded.
+
 Source: `data/processed/capacity-vulkan-35b-16gb-20261112.csv`,
 `data/processed/capacity-rocm-35b-16gb-20261112.csv`,
-`data/processed/campaign-vulkan-35b-16gb-20261112.csv`,
+`data/processed/campaign-vulkan-35b-16gb-5rep-20261112.csv`,
+`data/processed/campaign-vulkan-35b-16gb-64k-20261112.csv`,
 `data/processed/campaign-cpu-35b-16gb-20261112.csv`.
 
 ### 8c. Quantization at 16 GB

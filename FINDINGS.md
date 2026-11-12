@@ -54,12 +54,12 @@ The same ordering holds at depth 0 for every model tested, including the 35B:
 ## The carve-out changes speed, not just capacity
 
 At 16 GB the same small models decode 1.4–3.0x faster, and the 35B runs on
-Vulkan at **25.24 t/s** where it could not load at 0.5 GB. The cost is host RAM
+Vulkan at **24.19 t/s** where it could not load at 0.5 GB. The cost is host RAM
 (15.3 GiB): the 35B on CPU drops from 18.38 to 13.78 t/s.
 
 | 35B, depth 0 | 0.5 GB | 16 GB |
 |---|---:|---:|
-| Vulkan | fails | **25.24** |
+| Vulkan | fails | **24.19** |
 | ROCm | 17.66 | fails |
 | CPU | 18.38 | 13.78 |
 

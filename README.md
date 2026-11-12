@@ -30,8 +30,8 @@ it compares two different memory settings and cannot be reproduced at one.
   for the same model but runs only ~20% faster, so effective bandwidth halves:
   22.5 vs 38.7 GB/s against an assumed 120 GB/s peak.
 - **MTP is a clear win (1.51x); DFlash2 is marginal (1.28x, CI 1.00–1.56).**
-- **At the 16 GB carve-out the 35B finally runs on Vulkan: 25.24 t/s at depth 0,
-  21.33 at 16K** — the best 35B result measured. Small models also decode
+- **At the 16 GB carve-out the 35B finally runs on Vulkan: 24.19 t/s at depth 0,
+  20.45 at 16K, 14.68 at 64K** (5, 5 and 2 repetitions; spread under 1%). Small models also decode
   1.4–3.0x faster than at 0.5 GB, at the cost of host RAM.
 
 ## 1. Vulkan, ROCm and CPU at 0.5 GB
@@ -90,12 +90,16 @@ Vulkan:
 | LFM IQ4, 64K | 20.63 | 44.17 |
 | LFM Q8, 64K | 9.74 | 28.87 |
 | Qwen3-VL-4B, 16K | 5.46 | 12.54 |
-| **35B, Vulkan, depth 0** | **fails to load** | **25.24** |
+| **35B, Vulkan, depth 0** | **fails to load** | **24.19** |
 | 35B, ROCm, depth 0 | 17.66 | fails (5.00 at `-ngl 22`) |
 | 35B, CPU, depth 0 | 18.38 | 13.78 |
 
 Prefill at 64K is the exception: it is 0.56–0.61x of the 0.5 GB value, and the
-GPU reached 99 °C, so the comparison is thermally confounded. Full tables:
+GPU reached 99 °C, so the comparison is thermally confounded.
+
+All 35B numbers here use the **MTP variant** (17.25 GiB, 35.51 B, 41 layers).
+The archived comparison used a different file (16.79 GiB, 34.66 B, 40 layers)
+that is not on disk, so the two are not directly comparable. Full tables:
 [`RESULTS.md` §8](RESULTS.md).
 
 ## 2. Why the archive says 2.3x

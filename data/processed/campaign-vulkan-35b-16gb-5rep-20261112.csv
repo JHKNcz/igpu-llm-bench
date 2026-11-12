@@ -1,0 +1,5 @@
+run_id,model,quant,kv,threads,reps,backend,ngl,fa,test,depth,tps,tps_sd,size_gib,params_b,status,noisy,error,carveout_mib,carveout_index,carveout_label,gtt_mib,host_mib,cpu_temp_c_max,gpu_temp_c_max,gpu_power_w_max,build
+qwen35_mtp-f16-t12-r5,Qwen3.6-35B-A3B-MTP,UD-IQ4_NL,f16,12,5,Vulkan,999,1,pp512,0,367.38,26.48,17.25,35.51,ok,,,16384,7,High (16 GB),7639,15278,79.1,81.0,41.4,f872b5911 (11310)
+qwen35_mtp-f16-t12-r5,Qwen3.6-35B-A3B-MTP,UD-IQ4_NL,f16,12,5,Vulkan,999,1,tg128,0,24.19,0.23,17.25,35.51,ok,,,16384,7,High (16 GB),7639,15278,79.1,81.0,41.4,f872b5911 (11310)
+qwen35_mtp-f16-t12-r5,Qwen3.6-35B-A3B-MTP,UD-IQ4_NL,f16,12,5,Vulkan,999,1,pp512,16384,221.47,8.42,17.25,35.51,ok,,,16384,7,High (16 GB),7639,15278,91.4,93.0,46.2,f872b5911 (11310)
+qwen35_mtp-f16-t12-r5,Qwen3.6-35B-A3B-MTP,UD-IQ4_NL,f16,12,5,Vulkan,999,1,tg128,16384,20.45,0.17,17.25,35.51,ok,,,16384,7,High (16 GB),7639,15278,91.4,93.0,46.2,f872b5911 (11310)
