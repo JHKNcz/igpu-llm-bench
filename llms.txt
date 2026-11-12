@@ -1,0 +1,58 @@
+# igpu-llm-bench
+
+> Local LLM inference on an AMD UMA laptop APU (Ryzen AI 9 HX 375, Radeon 890M
+> iGPU): measured decode and prefill throughput for Vulkan, ROCm and CPU, the
+> memory carve-out commands, and the limits of each configuration.
+
+This repository answers practical questions about running local language models
+on unified-memory AMD laptop hardware. Every number is measured on one machine
+and traced to a file in `data/`.
+
+## Key facts
+
+- Machine: AMD Ryzen AI 9 HX 375, Radeon 890M (`gfx1150`), 32 GB LPDDR5X,
+  Ubuntu, kernel 7.0.0-43.
+- The VRAM carve-out is settable from Linux:
+  `echo 7 | sudo tee /sys/class/drm/card*/device/uma/carveout` (index 7 = 16 GB)
+  or `sudo amd-smi set -g 0 -m 7`. It survives reboot.
+- 16 GB carve-out: 16,384 MiB VRAM, 7,638 MiB GTT, 15,277 MiB host RAM,
+  24,022 MiB GPU-addressable.
+- 0.5 GB carve-out: 512 MiB VRAM, 15,438 MiB GTT, 30,877 MiB host RAM.
+- At short context the CPU was faster than the iGPU for every model tested:
+  36.7 t/s vs 30.6 (ROCm) and 24.0 (Vulkan) on an 8.69 GiB mixture-of-experts
+  model.
+- Prefill is the opposite: 1,175 t/s on Vulkan vs 263 t/s on the CPU for the
+  same model.
+- A 17.25 GiB 35B MoE model runs at 24.19 t/s on Vulkan at the 16 GB carve-out
+  (depth 0), 20.45 at 16K, 14.68 at 64K. ROCm cannot fully offload it at 16 GB.
+- IQ4 quantization carries 2.15x fewer bytes per token than Q8 but is only
+  1.41–1.92x faster, so effective bandwidth is lower for IQ4.
+- MTP speculative decoding: 1.51x (95% CI 1.37–1.63). DFlash2: 1.28x
+  (95% CI 1.00–1.56, marginal at n=9).
+
+## Start here
+
+- [Getting started](docs/getting-started.md): build llama.cpp, set the
+  carve-out, choose a model, run a first benchmark.
+- [FAQ](docs/faq.md): troubleshooting and how to read the numbers.
+- [Hardware](docs/hardware.md): the carve-out, GTT, heaps, model architecture.
+- [Limitations](docs/limitations.md): what the measurements do not establish.
+- [Results](RESULTS.md): every table with its source file.
+
+## Data and code
+
+- [Roofline analysis](analysis/roofline.md): bandwidth model and five hypotheses.
+- [Backend comparison](docs/related/backend-comparison-512mb.md): Vulkan vs ROCm
+  vs CPU at one carve-out, with shuffled rounds.
+- [Carve-out scripts](scripts/carveout.sh): inspect and set VRAM and GTT.
+- [Campaign runner](scripts/campaign.py): reproducible matrix with thermals.
+- [Verifier](scripts/verify_results.py): fails if the prose disagrees with data.
+
+## Caveats
+
+- One machine, one iGPU, one software stack (ROCm 10.0.0, llama.cpp
+  `f872b5911`).
+- The 35B measurements use the MTP variant (17.25 GiB); the archived 16.79 GiB
+  file is not present.
+- The carve-out comparison is thermally confounded (GPU reached 99 °C).
+- Not a supported product. Measurements are provided as-is with their limits.

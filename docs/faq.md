@@ -4,6 +4,47 @@ Practical answers for someone running this on their own laptop. If a symptom is
 not here, open an issue on the private repository or add a row to
 `docs/reproduction-checklist.md` once you have solved it.
 
+## Questions people actually ask
+
+### What is UMA, and why does it matter for local LLMs?
+
+UMA (unified memory architecture) means the CPU and GPU share one pool of
+physical RAM. On an AMD APU the BIOS reserves part of that pool as dedicated
+VRAM and exposes the rest to the GPU through the GTT aperture. A large model can
+therefore run without a discrete GPU, but what fits depends on the carve-out,
+and throughput depends on which path the weights take.
+
+### How do I run a 35B model on an AMD laptop?
+
+Use the 16 GB carve-out and Vulkan. On this machine a 17.25 GiB
+mixture-of-experts model runs at 24.19 tokens/s at depth 0, 20.45 at 16K and
+14.68 at 64K. ROCm cannot fully offload it at that setting because a single
+16,679.34 MiB allocation does not fit the 16,384 MiB device pool. Step by step:
+[`getting-started.md`](getting-started.md).
+
+### Why is my iGPU slower than my CPU?
+
+Decode generates one token at a time, so it is limited by memory bandwidth, and
+the CPU and iGPU read the same LPDDR5X through the same controller. The CPU
+adds no driver or command-submission overhead. On this machine the CPU beat the
+iGPU at short context for every model tested: 36.7 t/s against 30.6 (ROCm) and
+24.0 (Vulkan) on an 8.69 GiB model. Prefill is compute-dense and the GPU wins
+there by about 4x.
+
+### How much memory do I need for a model?
+
+Roughly the file size plus the KV cache plus a few hundred MiB of buffers. A
+4 GiB quant runs at the 0.5 GB carve-out; an 8.7 GiB quant runs at either; a
+17.25 GiB model needs the 16 GB carve-out and, on this machine, Vulkan rather
+than ROCm. Check the real numbers with
+`./scripts/carveout.sh --show` before downloading.
+
+### Does the VRAM carve-out affect speed, or only what fits?
+
+Both. At 16 GB the same small models decoded 1.4–3.0x faster than at 0.5 GB,
+and the 35B became runnable on Vulkan. The cost is host RAM: 15,277 MiB instead
+of 30,877 MiB, which made CPU inference of the 35B slower (13.78 vs 18.38 t/s).
+
 ## Before you run anything
 
 ### "Which model do I actually need?"

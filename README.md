@@ -1,38 +1,93 @@
 # igpu-llm-bench
 
-**Which backend is faster for local LLM inference on an AMD integrated GPU?
-It depends on the model size and the context depth — and for a mid-sized model
-the answer reverses.**
+**Local LLM inference on an AMD UMA laptop APU.** Measured on a Ryzen AI 9 HX 375
+with a Radeon 890M iGPU: what memory setting to use, which models fit, which
+backend to pick, and when the CPU beats the GPU.
 
-This repository contains a controlled Vulkan-vs-ROCm comparison at a fixed
-512 MiB carve-out, a first-order memory roofline, the raw logs, and the scripts
-that regenerate every table. The archived "2.3x" headline is kept, but demoted:
-it compares two different memory settings and cannot be reproduced at one.
+One laptop, three backends (Vulkan, ROCm, CPU), 360 measurements across 27 datasets,
+raw logs, and the scripts that regenerate every table. Built for people starting
+local inference on unified-memory AMD hardware.
 
----
+## Abstract
 
-## TL;DR
+Unified memory lets an AMD APU give its iGPU a large slice of system RAM, but the
+BIOS carve-out, the GTT aperture, and the backend all change what fits and how
+fast it runs. This repository measures those effects on one Ryzen AI 9 HX 375
+laptop, documents the commands, and reports the numbers with their uncertainty.
 
-- **The iGPU is not automatically faster than the CPU.** At short context the
-  CPU wins for every model tested, including the 35B: 36.5 vs 30.6 (ROCm) and
-  24.0 (Vulkan) t/s on the 8.69 GiB model.
-- **ROCm is the most consistent GPU backend.** It beats Vulkan at every depth
-  measured, by 1.28x at depth 0 and 1.60x at 16K, and wins in all three
-  randomised rounds at 16K.
-- **Vulkan is the most variable.** The same command gives 18.7–35.2 t/s at depth
-  0 across six repetitions. An earlier single-session value of 35.12 was the top
-  of that distribution, not the typical value; the "Vulkan wins at depth 0"
-  claim did not survive randomisation.
-- **The 35B is a capacity problem first.** At 512 MiB, ROCm loads it via unified
-  memory (17.66 t/s), the CPU runs it at 18.38 t/s, and Vulkan could not load it
-  with the desktop running.
-- **4-bit quantization is not free.** IQ4 moves half the bytes per token of Q8
-  for the same model but runs only ~20% faster, so effective bandwidth halves:
-  22.5 vs 38.7 GB/s against an assumed 120 GB/s peak.
-- **MTP is a clear win (1.51x); DFlash2 is marginal (1.28x, CI 1.00–1.56).**
-- **At the 16 GB carve-out the 35B finally runs on Vulkan: 24.19 t/s at depth 0,
-  20.45 at 16K, 14.68 at 64K** (5, 5 and 2 repetitions; spread under 1%). Small models also decode
-  1.4–3.0x faster than at 0.5 GB, at the cost of host RAM.
+## Short answers
+
+### How do I run a local LLM on an AMD laptop APU?
+
+Build llama.cpp with Vulkan, set the UMA carve-out to 16 GB, and load a GGUF that
+fits the dedicated pool. On this machine that runs a 17.25 GiB 35B mixture-of-experts
+model at 24.2 tokens/s. Copy-paste commands: [getting started](docs/getting-started.md).
+
+### What VRAM carve-out should I use?
+
+16 GB (index 7) for models up to about 16 GiB: it is the only setting where the
+17.25 GiB model loads on Vulkan, and small models decode 1.4–3.0x faster than at
+0.5 GB. Use 0.5 GB if you need host RAM or ROCm's unified-memory path. Change it
+with `echo 7 | sudo tee /sys/class/drm/card*/device/uma/carveout` — no BIOS trip.
+
+### Is the iGPU faster than the CPU for local inference?
+
+Not always. At short context the CPU was fastest for every model tested, including
+a 35B MoE: 36.7 vs 30.6 t/s (ROCm) and 24.0 (Vulkan) on an 8.69 GiB model. Prefill
+is the opposite: 1,175 vs 263 t/s. Decode is bandwidth-bound; prefill is
+compute-bound.
+
+### How large a model fits in 16 GB of GPU memory?
+
+At the 16 GB carve-out the GPU exposes 24,022 MiB across two heaps: 16 GiB
+dedicated plus 7.6 GiB GTT. A 17.25 GiB model loads on Vulkan but not on ROCm,
+whose single 16,679.34 MiB allocation must fit the 16,384 MiB pool.
+
+### Should I use Vulkan or ROCm?
+
+ROCm was more consistent and faster at depth on an 8.69 GiB model: 1.28x at depth
+0 and 1.60x at 16K. Vulkan is more variable (18.7–35.2 t/s at depth 0) but is the
+only backend that runs the 35B at 16 GB.
+
+## Quick start
+
+```bash
+git clone <this repo> && cd igpu-llm-bench
+./scripts/carveout.sh --show          # what the GPU currently has
+sudo ./scripts/carveout.sh --set-gb 16 --yes   # 16 GB carve-out, reboot after
+make check                            # regenerate and verify every number
+```
+
+Then follow [docs/getting-started.md](docs/getting-started.md) for the build and
+first run, and [docs/faq.md](docs/faq.md) for the traps.
+
+## Key findings
+
+- **The iGPU is not automatically faster than the CPU.** The CPU wins at short
+  context for every model tested; the GPU wins on prefill.
+- **The carve-out changes throughput, not just capacity.** 16 GB makes small
+  models decode 1.4–3.0x faster and is the only setting where the 35B loads on
+  Vulkan.
+- **ROCm is the steadier GPU backend; Vulkan is the faster one for the 35B.**
+- **4-bit quantization does not scale with its smaller footprint.** IQ4 carries
+  2.15x fewer bytes than Q8 but runs only 1.41–1.92x faster.
+- **MTP speculation is a clear win (1.51x); DFlash2 is marginal (1.28x, CI
+  1.00–1.56).**
+- **The archived 2.32x headline is cross-setting**, not a controlled effect size.
+
+## What this is
+
+A measurement repository with a guide attached. The measurements are the
+authority; the guide tells you what to do with them. Every number links to the
+file that produced it, and `scripts/verify_results.py` fails if the prose and the
+data disagree.
+
+**Who it is for:** people running local models on AMD APUs (Strix Point, Strix
+Halo, Ryzen AI), deciding between Vulkan and ROCm, or wondering why their iGPU is
+slower than expected.
+
+**Who it is not for:** anyone wanting a general GPU benchmark, a supported
+product, or numbers for hardware other than the one listed below.
 
 ## 1. Vulkan, ROCm and CPU at 0.5 GB
 
@@ -91,6 +146,8 @@ Vulkan:
 | LFM Q8, 64K | 9.74 | 28.87 |
 | Qwen3-VL-4B, 16K | 5.46 | 12.54 |
 | **35B, Vulkan, depth 0** | **fails to load** | **24.19** |
+| **35B, Vulkan, 16K** | — | **20.45** |
+| **35B, Vulkan, 64K** | — | **14.68** |
 | 35B, ROCm, depth 0 | 17.66 | fails (5.00 at `-ngl 22`) |
 | 35B, CPU, depth 0 | 18.38 | 13.78 |
 
@@ -234,6 +291,7 @@ Step-by-step, with the failure modes ordered by frequency:
 | `README.md` | This file |
 | `RESULTS.md` | Every table, one row per run, each with a source |
 | `docs/related/backend-comparison-512mb.md` | The controlled A/B, in full |
+| `docs/getting-started.md` | Build, carve-out, first model, first benchmark |
 | `docs/methodology.md` | Flags, repetitions, warmup, protocols |
 | `docs/hardware.md` | CPU, iGPU, RAM, both carve-outs, model architecture |
 | `docs/limitations.md` | Confounds, missing data, what would close each gap |
@@ -257,6 +315,7 @@ Step-by-step, with the failure modes ordered by frequency:
 | `scripts/order_effects.py` | Per-round ratios and order/thermal rank correlations |
 | `scripts/rocm-build.sh` | Build llama-bench with HIP inside a ROCm image |
 | `FINDINGS.md` | One page for a non-specialist reader |
+| `llms.txt` | Machine-readable summary for AI assistants |
 | `scripts/stats.py` | Paired ratios and bootstrap intervals |
 | `scripts/roofline.py`, `scripts/roofline_campaign.py` | Bandwidth models |
 | `scripts/chart.py` | Data → dependency-free SVG |

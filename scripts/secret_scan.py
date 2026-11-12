@@ -113,6 +113,11 @@ def main() -> int:
                     if kind == "ipv4" and LOG_PREFIX.match(line):
                         allowed += 1
                         continue
+                    # loopback is not personal data and is required in working
+                    # commands; allowlist it explicitly rather than mangling them
+                    if kind == "ipv4" and value == "127.0.0.1":
+                        allowed += 1
+                        continue
                     # intentional documentation placeholder
                     if kind == "home_path" and value == "/home/user":
                         allowed += 1

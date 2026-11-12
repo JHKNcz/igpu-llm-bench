@@ -15,14 +15,21 @@ date-released: "2026-11-08"
 license: MIT
 keywords:
   - llm
-  - benchmark
+  - local-inference
+  - uma
+  - unified-memory
   - igpu
+  - apu
+  - laptop
+  - amd
+  - ryzen-ai
+  - radeon-890m
+  - strix-point
   - vulkan
   - rocm
   - llama.cpp
   - speculative-decoding
   - roofline
-  - strix-point
 # No repository URL is recorded here on purpose: the repository is private and
 # the account name would identify the owner. Cite the title and version instead.
 references:

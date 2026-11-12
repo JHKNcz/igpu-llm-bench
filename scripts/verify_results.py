@@ -229,6 +229,29 @@ def main() -> int:
             print(f"FAIL: unexpected Vulkan 35B measurement in {name}")
             failures += 1
 
+    # --- discoverability terms and internal links ---------------------------
+    llms = (ROOT / "llms.txt").read_text().lower()
+    for term in ("uma", "igpu", "local", "inference", "laptop", "amd"):
+        if term not in llms:
+            print(f"FAIL: llms.txt missing discoverability term {term!r}")
+            failures += 1
+        else:
+            print(f"ok   llms.txt: {term!r}")
+
+    import re as _re
+    link_re = _re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+    broken = 0
+    for md in list((ROOT / "docs").rglob("*.md")) + [ROOT / "README.md", ROOT / "RESULTS.md"]:
+        for match in link_re.finditer(md.read_text()):
+            target = match.group(1).split("#")[0]
+            if not target or target.startswith(("http://", "https://", "mailto:")):
+                continue
+            if not (md.parent / target).resolve().exists():
+                print(f"FAIL link: {md.relative_to(ROOT)} -> {target}")
+                broken += 1
+    if broken:
+        failures += broken
+
     # --- carve-out control surface must stay documented ---------------------
     hw = (ROOT / "docs/hardware.md").read_text()
     for needle, why in [
