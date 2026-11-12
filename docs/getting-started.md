@@ -31,6 +31,11 @@ with 15,277 MiB left for the OS.
 
 ## 2. Set the carve-out
 
+> **Firmware write.** The commands below change UEFI settings. Save your work,
+> and read [`../DISCLAIMER.md`](../DISCLAIMER.md) first. Raising the carve-out
+> takes RAM from the host; if the machine becomes unstable, reset the setting in
+> UEFI.
+
 The carve-out is a UEFI setting, but it is writable from Linux:
 
 ```bash

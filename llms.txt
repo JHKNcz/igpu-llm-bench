@@ -49,6 +49,7 @@ and traced to a file in `data/`.
 - [Carve-out scripts](scripts/carveout.sh): inspect and set VRAM and GTT.
 - [Campaign runner](scripts/campaign.py): reproducible matrix with thermals.
 - [Verifier](scripts/verify_results.py): fails if the prose disagrees with data.
+- [Disclaimer](DISCLAIMER.md): scope, firmware risk, no warranty.
 
 ## Caveats
 

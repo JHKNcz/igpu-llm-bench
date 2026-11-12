@@ -92,6 +92,8 @@ vulkaninfo | grep -A6 'memoryHeaps: count'
 
 ## Changing them
 
+> Both of these are firmware writes. See [`../DISCLAIMER.md`](../DISCLAIMER.md).
+
 **Carve-out** (takes effect immediately, persists across reboot):
 
 ```bash

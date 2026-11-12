@@ -229,6 +229,21 @@ def main() -> int:
             print(f"FAIL: unexpected Vulkan 35B measurement in {name}")
             failures += 1
 
+    # --- disclaimer must exist and be reachable from the front page ---------
+    disc = ROOT / "DISCLAIMER.md"
+    if not disc.exists():
+        print("FAIL: DISCLAIMER.md missing")
+        failures += 1
+    else:
+        text = disc.read_text().lower()
+        for needle in ("not affiliated", "no warranty", "firmware", "as is"):
+            if needle not in text:
+                print(f"FAIL disclaimer: missing {needle!r}")
+                failures += 1
+        if "DISCLAIMER.md" not in (ROOT / "README.md").read_text():
+            print("FAIL: README does not link the disclaimer")
+            failures += 1
+
     # --- memory doc must keep the numbers and the terminology ---------------
     memdoc = (ROOT / "docs/memory.md").read_text()
     for needle, why in [

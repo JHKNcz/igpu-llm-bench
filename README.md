@@ -62,6 +62,11 @@ make check                            # regenerate and verify every number
 Then follow [docs/getting-started.md](docs/getting-started.md) for the build and
 first run, and [docs/faq.md](docs/faq.md) for the traps.
 
+> **Before you change memory settings:** the carve-out and GTT commands write
+> firmware settings. Raising the carve-out takes RAM from the host, and a
+> machine with too little host memory can become unstable. Read
+> [DISCLAIMER.md](DISCLAIMER.md) first.
+
 ## Key findings
 
 - **The iGPU is not automatically faster than the CPU.** The CPU wins at short
@@ -317,6 +322,7 @@ Step-by-step, with the failure modes ordered by frequency:
 | `scripts/order_effects.py` | Per-round ratios and order/thermal rank correlations |
 | `scripts/rocm-build.sh` | Build llama-bench with HIP inside a ROCm image |
 | `FINDINGS.md` | One page for a non-specialist reader |
+| `DISCLAIMER.md` | Scope, firmware risk, no warranty |
 | `llms.txt` | Machine-readable summary for AI assistants |
 | `scripts/stats.py` | Paired ratios and bootstrap intervals |
 | `scripts/roofline.py`, `scripts/roofline_campaign.py` | Bandwidth models |

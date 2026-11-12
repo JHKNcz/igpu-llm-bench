@@ -85,6 +85,8 @@ so its ROCm numbers cannot be re-run without a rebuild or the original container
 
 ### "How do I change the VRAM carve-out without going into BIOS?"
 
+*This writes a firmware setting. See [`../DISCLAIMER.md`](../DISCLAIMER.md).*
+
 On kernel 7.0.0-43 the carve-out is writable at runtime:
 
 ```bash
