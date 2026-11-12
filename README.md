@@ -53,7 +53,7 @@ only backend that runs the 35B at 16 GB.
 ## Quick start
 
 ```bash
-git clone <this repo> && cd igpu-llm-bench
+git clone https://github.com/JHKNcz/igpu-llm-bench.git && cd igpu-llm-bench
 ./scripts/carveout.sh --show          # what the GPU currently has
 sudo ./scripts/carveout.sh --set-gb 16 --yes   # 16 GB carve-out, reboot after
 make check                            # regenerate and verify every number

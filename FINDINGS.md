@@ -98,7 +98,7 @@ survives reboot. `scripts/carveout.sh --show` prints the state.
 ## How to check it
 
 ```bash
-git clone <this repo>
+git clone https://github.com/JHKNcz/igpu-llm-bench.git
 make check        # regenerate, verify every number against the data, scan
 ```
 
