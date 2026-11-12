@@ -1,4 +1,4 @@
 label,model,model_gib,carveout_mib,gtt_mib,started_utc,ngl,status,tg_tps,test,error,vram_used_before_mib,gtt_used_before_mib,vram_used_after_mib,gtt_used_after_mib
-Qwen3.6-35B-A3B-MTP-rocm-16gb,<models>/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf,17.26,16384,7639,2026-11-12T01:12:29.553771+00:00,999,failed,,,error: failed to load model '/LLM/LLMs/Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf',853,34,853,34
-Qwen3.6-35B-A3B-MTP-rocm-16gb,<models>/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf,17.26,16384,7639,2026-11-12T01:12:29.553771+00:00,34,failed,,,error: failed to load model '/LLM/LLMs/Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf',853,34,853,34
+Qwen3.6-35B-A3B-MTP-rocm-16gb,<models>/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf,17.26,16384,7639,2026-11-12T01:12:29.553771+00:00,999,failed,,,error: failed to load model '<models>/Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf',853,34,853,34
+Qwen3.6-35B-A3B-MTP-rocm-16gb,<models>/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf,17.26,16384,7639,2026-11-12T01:12:29.553771+00:00,34,failed,,,error: failed to load model '<models>/Qwen3.6-MTP/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf',853,34,853,34
 Qwen3.6-35B-A3B-MTP-rocm-16gb,<models>/Qwen3.6-35B-A3B-UD-IQ4_NL.gguf,17.26,16384,7639,2026-11-12T01:12:29.553771+00:00,22,loaded,5.00,tg8,,853,34,853,34

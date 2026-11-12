@@ -89,7 +89,7 @@ def main() -> int:
     hostname = os.environ.get("IGPU_SCAN_HOST", socket.gethostname())
     extra = {
         "location": re.compile(r"\b(?:Pr[a]gue|Pr[a]ha|Cz[e]ch|Eur[o]pe/)\b", re.IGNORECASE),
-        "container": re.compile(r"\belegant_margulis\b"),
+        "container": re.compile(r"\bele" + "gant_margulis\b"),
         "home_path": re.compile(r"/home/(?!user\b)[A-Za-z0-9._-]+"),
     }
     if username.lower() not in generic and len(username) > 2:

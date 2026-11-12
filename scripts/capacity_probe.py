@@ -109,7 +109,7 @@ def main() -> int:
             "-r", "1", "-d", "0",
         ]
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=args.timeout)
-        text = proc.stdout + proc.stderr
+        text = (proc.stdout + proc.stderr).replace("/LLM/LLMs/", "<models>/").replace("/LLM/", "<llm-root>/")
         with log.open("a") as handle:
             handle.write(f"\n### ngl={ngl} rc={proc.returncode}\n{text}")
 
