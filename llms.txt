@@ -35,6 +35,8 @@ and traced to a file in `data/`.
 - [Getting started](docs/getting-started.md): build llama.cpp, set the
   carve-out, choose a model, run a first benchmark.
 - [FAQ](docs/faq.md): troubleshooting and how to read the numbers.
+- [Memory](docs/memory.md): RAM, VRAM carve-out, GTT and shared memory, with
+  the arithmetic and the measured states.
 - [Hardware](docs/hardware.md): the carve-out, GTT, heaps, model architecture.
 - [Limitations](docs/limitations.md): what the measurements do not establish.
 - [Results](RESULTS.md): every table with its source file.

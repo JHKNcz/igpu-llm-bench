@@ -23,6 +23,8 @@ Two numbers matter:
 - **VRAM** (`mem_info_vram_total`) is the dedicated carve-out.
 - **GTT** (`mem_info_gtt_total`) is the shared window into system RAM.
 
+Full explanation of all four memory numbers: [`memory.md`](memory.md).
+
 They are not additive with host RAM: VRAM is reserved, GTT is mappable system
 memory. On this machine, 16 GB carve-out gives 16,384 MiB VRAM + 7,638 MiB GTT
 with 15,277 MiB left for the OS.

@@ -12,7 +12,8 @@ UMA (unified memory architecture) means the CPU and GPU share one pool of
 physical RAM. On an AMD APU the BIOS reserves part of that pool as dedicated
 VRAM and exposes the rest to the GPU through the GTT aperture. A large model can
 therefore run without a discrete GPU, but what fits depends on the carve-out,
-and throughput depends on which path the weights take.
+and throughput depends on which path the weights take. The four numbers and how
+they relate: [`memory.md`](memory.md).
 
 ### How do I run a 35B model on an AMD laptop?
 

@@ -62,6 +62,8 @@ comparison note.
 
 ### Changing the carve-out and GTT from Linux
 
+For how the four memory numbers relate, see [`memory.md`](memory.md).
+
 The carve-out is a UEFI setting, but on kernel 7.0.0-43 it is also writable at
 runtime. Two interfaces exist; both were confirmed on 2026-11-12.
 

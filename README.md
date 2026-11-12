@@ -41,7 +41,8 @@ compute-bound.
 
 At the 16 GB carve-out the GPU exposes 24,022 MiB across two heaps: 16 GiB
 dedicated plus 7.6 GiB GTT. A 17.25 GiB model loads on Vulkan but not on ROCm,
-whose single 16,679.34 MiB allocation must fit the 16,384 MiB pool.
+whose single 16,679.34 MiB allocation must fit the 16,384 MiB pool. The four
+memory numbers and how they relate: [memory](docs/memory.md).
 
 ### Should I use Vulkan or ROCm?
 
@@ -293,6 +294,7 @@ Step-by-step, with the failure modes ordered by frequency:
 | `docs/related/backend-comparison-512mb.md` | The controlled A/B, in full |
 | `docs/getting-started.md` | Build, carve-out, first model, first benchmark |
 | `docs/methodology.md` | Flags, repetitions, warmup, protocols |
+| `docs/memory.md` | RAM, VRAM carve-out, GTT and shared memory, with the arithmetic |
 | `docs/hardware.md` | CPU, iGPU, RAM, both carve-outs, model architecture |
 | `docs/limitations.md` | Confounds, missing data, what would close each gap |
 | `docs/glossary.md` | tg128, GTT, A3B, KV cache, draft acceptance |

@@ -229,6 +229,26 @@ def main() -> int:
             print(f"FAIL: unexpected Vulkan 35B measurement in {name}")
             failures += 1
 
+    # --- memory doc must keep the numbers and the terminology ---------------
+    memdoc = (ROOT / "docs/memory.md").read_text()
+    for needle, why in [
+        ("GTT", "GTT term"),
+        ("shared memory", "shared-memory term"),
+        ("carve-out", "carve-out term"),
+        ("15,950", "0.5 GB GPU-addressable total"),
+        ("24,022", "16 GB GPU-addressable total"),
+        ("15,438", "GTT at 0.5 GB"),
+        ("7,638", "GTT at 16 GB"),
+        ("30,877", "host RAM at 0.5 GB"),
+        ("15,277", "host RAM at 16 GB"),
+        ("3,952,376", "ttm pages_limit"),
+    ]:
+        if needle not in memdoc:
+            print(f"FAIL memory doc: missing {needle!r} ({why})")
+            failures += 1
+        else:
+            print(f"ok   memory doc: {needle!r}")
+
     # --- discoverability terms and internal links ---------------------------
     llms = (ROOT / "llms.txt").read_text().lower()
     for term in ("uma", "igpu", "local", "inference", "laptop", "amd"):
