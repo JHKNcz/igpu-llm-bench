@@ -54,9 +54,10 @@ size is not settled.
   recorded; the current Mesa is 26.0.8.
 - The exact RAM type/speed is not recorded. The roofline uses 120 GB/s with
   102.4–128 GB/s sensitivity.
-- GTT sizing is only partly understood. `ttm.pages_limit` does not change the
-  aperture; `amd-smi set -G` is the correct command form but its persistence
-  across a reboot has not been measured. See `docs/hardware.md`.
+- GTT sizing is settable (`amd-smi set -G`, reboot required) but its effect on
+  model loading has not been measured. The 16 GB results here were taken with
+  GTT at 7,638 MiB. Whether a larger GTT changes the 35B load or throughput is
+  untested. See `docs/hardware.md`.
 
 ## Missing files and runtime
 

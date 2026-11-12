@@ -19,6 +19,12 @@ Measured at index 7 (16,384 MiB VRAM, 7,638 MiB GTT, 15,277 MiB host).
   loads, `-ngl 22` fails).
 - Added `scripts/compare_carveouts.py`, `make carveouts`, and carve-out index
   and label in every campaign row.
+- **GTT is settable and is a boot-time setting.** `sudo amd-smi set -G 12`
+  reports success and "Reboot required for changes to take effect"; the value
+  does not change until the next boot. `sudo amd-smi reset --gtt` restores the
+  default. `-G` is system-wide and is rejected when combined with `-g`.
+- `ttm.pages_limit` is a TTM allocation cap, **not** the GTT aperture: writing
+  it leaves `mem_info_gtt_total` unchanged.
 
 ## 2026-11-12 — Carve-out is settable from Linux
 
@@ -32,8 +38,7 @@ Measured at index 7 (16,384 MiB VRAM, 7,638 MiB GTT, 15,277 MiB host).
 - Recorded the two traps: the GPU is `card1` (not `card0`) and index 8 is
   invalid.
 - Added `scripts/carveout.sh` (`--show`, `--set-gb`, `--set-index`, `--gtt-gb`).
-- GTT commands are documented but **unverified**; the write needs interactive
-  sudo and has not been run on this machine yet.
+- GTT was still unverified at this point; see the entry above.
 
 ## 2026-11-10 — Randomised replication, CPU baselines, corrections
 

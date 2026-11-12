@@ -116,36 +116,37 @@ without hardcoding one.
 
 #### GTT size
 
-GTT is the shared aperture the GPU can address, separate from the dedicated
-carve-out. At the 16 GB setting it is **7,638 MiB**; at 0.5 GB it was
-**15,438 MiB**. The two are a trade-off: the carve-out takes memory out of the
-host, and GTT is the remaining GPU-addressable window.
+GTT is the shared aperture through which the GPU can map system RAM. It is
+separate from the dedicated carve-out and is a subset of host-visible memory,
+not additional to it.
 
-There is no `uma/gtt` sysfs node. Two interfaces were tested on 2026-11-12:
+| Setting | GTT | Host-visible RAM |
+|---|---:|---:|
+| 0.5 GB carve-out | 15,438 MiB | 30,877 MiB |
+| 16 GB carve-out | 7,638 MiB | 15,277 MiB |
 
-| Attempt | Result |
-|---|---|
-| `sudo amd-smi set -G 12` | **Rejected when combined with `-g`.** `-G` is system-wide: `--gtt/-G: not allowed with argument --gpu/-g`. The correct form is `amd-smi set -G 12` with no `-g`. |
-| `echo 3145728 > /sys/module/ttm/parameters/pages_limit` | Write succeeds (value changes to 3,145,728) but `mem_info_gtt_total` stays **7,638 MiB**. `pages_limit` is a TTM allocation cap, not the GTT aperture. |
-
-So `ttm.pages_limit` is **not** the GTT control. The remaining candidate is
-`amd-smi set -G <GB>` without `-g`, which was not exercised because the write
-needs interactive sudo and a reboot to confirm persistence.
-
-Fallback if that does not persist: the kernel command line,
-`amdgpu.gttsize=12288` (MB), which is applied at module load.
+**Control interface (confirmed 2026-11-12):**
 
 ```bash
-# correct form (system-wide, no -g)
-sudo amd-smi set -G 12
-
-# fallback, requires reboot
-# add to GRUB_CMDLINE_LINUX: amdgpu.gttsize=12288
+amd-smi static -v                 # current values
+sudo amd-smi set -G 12            # request 12 GB, system-wide
+sudo amd-smi reset --gtt          # restore the system default
 ```
 
-`scripts/gtt-test.sh` runs both candidates, restores `pages_limit` afterwards,
-and logs before/after GTT and host RAM so the result can be recorded rather
-than assumed.
+`set -G` reports success and states **"Reboot required for changes to take
+effect."** The write does not change `mem_info_gtt_total` until the next boot,
+so GTT is a boot-time setting. `-G` must not be combined with `-g`; the tool
+rejects it as a per-GPU argument.
+
+Two things that do **not** control GTT, both tested:
+
+- `ttm.pages_limit` — writable, and a real cap on TTM allocations, but writing
+  it leaves `mem_info_gtt_total` unchanged (7,638 MiB). It is not the aperture.
+- Kernel command line `amdgpu.gttsize=` — untested; the tool-level route works,
+  so this is only a fallback.
+
+`scripts/gtt-test.sh` runs both attempts, restores `pages_limit`, and logs
+before/after values.
 
 ### Measured state at 16 GB (2026-11-12)
 

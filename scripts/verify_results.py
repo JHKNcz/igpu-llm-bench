@@ -235,6 +235,9 @@ def main() -> int:
         ("uma/carveout", "raw sysfs carve-out node"),
         ("carveout_options", "index table"),
         ("amd-smi set -g 0 -m", "amd-smi carve-out command"),
+        ("amd-smi set -G", "GTT command"),
+        ("amd-smi reset --gtt", "GTT reset command"),
+        ("Reboot required", "GTT is a boot-time setting"),
         ("card1", "the card-number pitfall"),
     ]:
         if needle not in hw:
