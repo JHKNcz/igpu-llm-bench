@@ -93,8 +93,15 @@ Observed table on this machine (`card1`):
 3: (4 GB)               7: High (16 GB)
 ```
 
-The write persists across a reboot: it goes through the EFI variable
-`UmaCarveOutIndexDefault`, which held `0` before the change and `7` after.
+**The write is a request, not an immediate change.** After writing, the
+`carveout` file shows the new index but `mem_info_vram_total` keeps the value
+from the last boot until you reboot. Observed on 2026-11-17: file `1`, active
+VRAM `16,384 MiB`.
+
+Persistence across a reboot was observed (index 7 survived). The storage
+mechanism is **not** the EFI variable `UmaCarveOutIndexDefault`: that variable
+reads `0` even when the selection is `1` or was `7`, so it is a factory default,
+not the current value. Where the selection is stored is unknown.
 
 **Pitfalls, both observed:**
 

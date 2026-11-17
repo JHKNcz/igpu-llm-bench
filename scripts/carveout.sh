@@ -51,10 +51,10 @@ show() {
   local card=${node%/device/uma/carveout}
   echo "card:        ${card##*/}"
   echo "node:        $node"
-  echo "index:       $(cat "$node")"
+  echo "index:       $(cat "$node")   (requested; applied at next boot)"
   echo "options:"
   sed 's/^/  /' "${node%carveout}carveout_options"
-  echo "vram_total:  $(( $(cat "$card/device/mem_info_vram_total") / 1048576 )) MiB"
+  echo "vram_active: $(( $(cat "$card/device/mem_info_vram_total") / 1048576 )) MiB   (currently in use)"
   echo "gtt_total:   $(( $(cat "$card/device/mem_info_gtt_total") / 1048576 )) MiB"
   awk '/MemTotal/ {printf "host_total:  %d MiB\n", $2/1024}' /proc/meminfo
   if command -v amd-smi >/dev/null; then
@@ -63,17 +63,24 @@ show() {
 }
 
 index_for_gb() {
-  local gb="$1"
-  local node
+  local gb="$1" node options line idx val unit
   node=$(find_node)
-  local options="${node%carveout}carveout_options"
-  # Labels look like "7: High (16 GB)" or "1:  (1 GB)".
-  awk -v want="$gb" '
-    match($0, /\(([0-9]+) GB\)/, m) {
-      if (m[1] == want) { print $1; found=1; exit }
-    }
-    END { if (!found) exit 1 }
-  ' "$options"
+  options="${node%carveout}carveout_options"
+  while IFS= read -r line; do
+    idx="${line%%:*}"
+    if [[ "$line" =~ \(([0-9.]+)\ (GB|MB)\) ]]; then
+      val="${BASH_REMATCH[1]}"
+      unit="${BASH_REMATCH[2]}"
+      if [[ "$unit" == "MB" ]]; then
+        val=$(awk -v v="$val" 'BEGIN { printf "%.4f", v / 1024 }')
+      fi
+      if awk -v a="$val" -v b="$gb" 'BEGIN { exit !(a + 0 == b + 0) }'; then
+        printf '%s\n' "$idx"
+        return 0
+      fi
+    fi
+  done < "$options"
+  return 1
 }
 
 require_yes() {

@@ -2,6 +2,19 @@
 
 All notable changes to this repository. Dates are UTC unless stated.
 
+## 2026-11-17 — Carve-out writes are pending, GTT request confirmed
+
+- **Clarified the write semantics.** Writing `uma/carveout` changes the
+  requested index immediately, but `mem_info_vram_total` keeps the value from
+  the last boot until you reboot. Observed: file `1`, active VRAM `16,384 MiB`.
+- **Corrected the storage claim.** The selection is *not* stored in
+  `UmaCarveOutIndexDefault`, which reads `0` regardless; it appears to be a
+  factory default. Where the selection lives is unknown.
+- **GTT confirmed.** The 12 GB `amd-smi set -G` request was applied at boot:
+  `mem_info_gtt_total` now reads 12,288 MiB. GTT is boot-time and persistent.
+- `carveout.sh` now maps `--set-gb 0.5` to index 0 and shows the requested
+  index separately from the active VRAM.
+
 ## 2026-11-12 — 16 GB carve-out campaign
 
 Measured at index 7 (16,384 MiB VRAM, 7,638 MiB GTT, 15,277 MiB host).

@@ -94,7 +94,7 @@ vulkaninfo | grep -A6 'memoryHeaps: count'
 
 > Both of these are firmware writes. See [`../DISCLAIMER.md`](../DISCLAIMER.md).
 
-**Carve-out** (takes effect immediately, persists across reboot):
+**Carve-out** (requested immediately, applied at the next boot):
 
 ```bash
 echo 7 | sudo tee /sys/class/drm/card*/device/uma/carveout   # 16 GB
@@ -109,7 +109,8 @@ sudo amd-smi reset --gtt     # restore the default
 ```
 
 `amd-smi` reports "Reboot required for changes to take effect", and
-`mem_info_gtt_total` does not change until then.
+`mem_info_gtt_total` does not change until then. That was confirmed by a reboot
+that applied a 12 GB request.
 
 `ttm.pages_limit` is **not** the GTT aperture. Writing it changes a TTM
 allocation cap and leaves `mem_info_gtt_total` unchanged; on this machine the
@@ -128,8 +129,8 @@ on the CPU there, against 18.38 t/s at 0.5 GB.
 
 ## What is not known
 
-- Whether a larger GTT changes model loading or throughput. It was set once
-  (12 GB, pending reboot) and reset before measurement.
+- Whether a larger GTT changes model loading or throughput. A 12 GB request was
+  applied on 2026-11-17 but not benchmarked.
 - Whether GTT can be configured above host-visible RAM.
 - The exact allocator behaviour that makes Vulkan span heaps and ROCm not.
 
